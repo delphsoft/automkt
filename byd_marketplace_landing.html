@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VendeBYD - Plataforma P2P para vender tu BYD sin comisión</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif; color: #1a1a1a; line-height: 1.6; }
+        
+        /* Header Navigation */
+        header { background: #fff; border-bottom: 1px solid #e0e0e0; position: sticky; top: 0; z-index: 100; }
+        nav { max-width: 1200px; margin: 0 auto; padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; }
+        .logo { font-size: 24px; font-weight: 700; color: #1e40af; }
+        .nav-links { display: flex; gap: 2rem; list-style: none; }
+        .nav-links a { text-decoration: none; color: #666; font-weight: 500; transition: color 0.3s; }
+        .nav-links a:hover { color: #1e40af; }
+        
+        /* Hero Section */
+        .hero { background: linear-gradient(135deg, #f0f4ff 0%, #fff 100%); padding: 6rem 2rem; text-align: center; }
+        .hero-content { max-width: 900px; margin: 0 auto; }
+        h1 { font-size: 48px; font-weight: 700; margin-bottom: 1rem; color: #1a1a1a; line-height: 1.2; }
+        .subheading { font-size: 20px; color: #666; margin-bottom: 2rem; max-width: 600px; margin-left: auto; margin-right: auto; }
+        .cta-group { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; margin-bottom: 3rem; }
+        .btn { padding: 14px 32px; border: none; border-radius: 8px; font-size: 16px; font-weight: 600; cursor: pointer; transition: all 0.3s; text-decoration: none; display: inline-block; }
+        .btn-primary { background: #1e40af; color: white; }
+        .btn-primary:hover { background: #1e3a8a; transform: translateY(-2px); box-shadow: 0 8px 24px rgba(30, 64, 175, 0.2); }
+        .btn-secondary { background: white; color: #1e40af; border: 2px solid #1e40af; }
+        .btn-secondary:hover { background: #f0f4ff; }
+        
+        .hero-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 2rem; margin-top: 4rem; }
+        .stat { padding: 1.5rem; background: white; border-radius: 8px; border: 1px solid #e0e0e0; }
+        .stat-number { font-size: 32px; font-weight: 700; color: #1e40af; }
+        .stat-label { font-size: 14px; color: #666; margin-top: 0.5rem; }
+        
+        /* Features Section */
+        .features { max-width: 1200px; margin: 4rem auto; padding: 0 2rem; }
+        .features h2 { font-size: 36px; font-weight: 700; text-align: center; margin-bottom: 3rem; }
+        .features-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 2rem; }
+        .feature-card { padding: 2rem; background: white; border: 1px solid #e0e0e0; border-radius: 12px; transition: all 0.3s; }
+        .feature-card:hover { transform: translateY(-4px); box-shadow: 0 12px 32px rgba(0, 0, 0, 0.08); }
+        .feature-icon { width: 56px; height: 56px; background: #f0f4ff; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 28px; margin-bottom: 1rem; }
+        .feature-card h3 { font-size: 20px; font-weight: 600; margin-bottom: 0.5rem; }
+        .feature-card p { color: #666; font-size: 15px; }
+        
+        /* How It Works */
+        .how-it-works { background: #f9f9f9; padding: 4rem 2rem; margin-top: 4rem; }
+        .how-it-works-content { max-width: 1200px; margin: 0 auto; }
+        .how-it-works h2 { font-size: 36px; font-weight: 700; text-align: center; margin-bottom: 3rem; }
+        .steps { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 2rem; }
+        .step { text-align: center; }
+        .step-number { width: 48px; height: 48px; background: #1e40af; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 24px; font-weight: 700; margin: 0 auto 1rem; }
+        .step h3 { font-size: 18px; font-weight: 600; margin-bottom: 0.5rem; }
+        .step p { color: #666; font-size: 14px; }
+        
+        /* Dealer Partnership Section */
+        .dealer-section { max-width: 1200px; margin: 4rem auto; padding: 0 2rem; background: #f0f4ff; border-radius: 16px; padding: 3rem; }
+        .dealer-content { display: grid; grid-template-columns: 1fr 1fr; gap: 3rem; align-items: center; }
+        .dealer-text h2 { font-size: 32px; font-weight: 700; margin-bottom: 1rem; }
+        .dealer-text p { color: #666; font-size: 16px; margin-bottom: 1.5rem; }
+        .dealer-benefits { list-style: none; }
+        .dealer-benefits li { padding: 0.75rem 0; color: #666; font-size: 15px; }
+        .dealer-benefits li:before { content: "✓ "; color: #1e40af; font-weight: 700; margin-right: 0.75rem; }
+        
+        /* Trust Signals */
+        .trust-section { max-width: 1200px; margin: 4rem auto; padding: 0 2rem; }
+        .trust-section h2 { font-size: 36px; font-weight: 700; text-align: center; margin-bottom: 3rem; }
+        .trust-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 2rem; }
+        .trust-item { text-align: center; padding: 1.5rem; border: 1px solid #e0e0e0; border-radius: 8px; }
+        .trust-item-icon { font-size: 40px; margin-bottom: 1rem; }
+        .trust-item h3 { font-size: 16px; font-weight: 600; margin-bottom: 0.5rem; }
+        .trust-item p { color: #666; font-size: 14px; }
+        
+        /* Pricing Section */
+        .pricing { max-width: 1200px; margin: 4rem auto; padding: 0 2rem; }
+        .pricing h2 { font-size: 36px; font-weight: 700; text-align: center; margin-bottom: 3rem; }
+        .pricing-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem; }
+        .pricing-card { padding: 2rem; background: white; border: 2px solid #e0e0e0; border-radius: 12px; text-align: center; transition: all 0.3s; }
+        .pricing-card.featured { border-color: #1e40af; background: #f0f4ff; }
+        .pricing-card h3 { font-size: 20px; font-weight: 700; margin-bottom: 1rem; }
+        .pricing-price { font-size: 32px; font-weight: 700; color: #1e40af; margin-bottom: 1rem; }
+        .pricing-desc { color: #666; font-size: 14px; margin-bottom: 1.5rem; }
+        .pricing-features { list-style: none; margin-bottom: 2rem; text-align: left; }
+        .pricing-features li { padding: 0.5rem 0; color: #666; font-size: 14px; }
+        .pricing-features li:before { content: "✓ "; color: #1e40af; font-weight: 700; margin-right: 0.5rem; }
+        
+        /* CTA Section */
+        .final-cta { background: linear-gradient(135deg, #1e40af 0%, #1e3a8a 100%); color: white; padding: 4rem 2rem; text-align: center; margin-top: 4rem; }
+        .final-cta h2 { font-size: 36px; font-weight: 700; margin-bottom: 1.5rem; }
+        .final-cta p { font-size: 18px; margin-bottom: 2rem; max-width: 600px; margin-left: auto; margin-right: auto; opacity: 0.9; }
+        .final-cta .btn { padding: 16px 40px; font-size: 18px; }
+        
+        /* Form Modal */
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); z-index: 1000; align-items: center; justify-content: center; }
+        .modal.active { display: flex; }
+        .modal-content { background: white; padding: 2rem; border-radius: 12px; max-width: 500px; width: 90%; }
+        .modal-close { float: right; font-size: 28px; font-weight: 700; cursor: pointer; color: #999; }
+        .modal-close:hover { color: #1a1a1a; }
+        .form-group { margin-bottom: 1.5rem; }
+        .form-group label { display: block; margin-bottom: 0.5rem; font-weight: 600; color: #1a1a1a; }
+        .form-group input, .form-group select { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 6px; font-size: 15px; }
+        .form-group input:focus, .form-group select:focus { outline: none; border-color: #1e40af; box-shadow: 0 0 0 3px rgba(30, 64, 175, 0.1); }
+        .form-submit { background: #1e40af; color: white; padding: 12px 24px; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; width: 100%; transition: background 0.3s; }
+        .form-submit:hover { background: #1e3a8a; }
+        
+        /* Footer */
+        footer { background: #1a1a1a; color: white; padding: 2rem; text-align: center; margin-top: 4rem; }
+        footer p { font-size: 14px; opacity: 0.8; }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            h1 { font-size: 32px; }
+            .subheading { font-size: 18px; }
+            .cta-group { flex-direction: column; }
+            .btn { width: 100%; }
+            .hero-stats { grid-template-columns: 1fr; }
+            .dealer-content { grid-template-columns: 1fr; }
+            nav { padding: 1rem; }
+            .nav-links { gap: 1rem; font-size: 14px; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <header>
+        <nav>
+            <div class="logo">VendeBYD</div>
+            <ul class="nav-links">
+                <li><a href="#features">¿Cómo funciona?</a></li>
+                <li><a href="#partners">Para dealers</a></li>
+                <li><a href="#pricing">Precios</a></li>
+                <li><a href="#" onclick="openModal('contact'); return false;">Contacto</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-content">
+            <h1>Vende tu BYD sin comisión en 3 días</h1>
+            <p class="subheading">La primera plataforma P2P para vender autos chinos en Argentina. Verificación legal, trámites automáticos, sin intermediarios.</p>
+            <div class="cta-group">
+                <button class="btn btn-primary" onclick="openModal('sellers')">Registra tu BYD</button>
+                <button class="btn btn-secondary" onclick="openModal('dealers')">Socios comerciales</button>
+            </div>
+            <div class="hero-stats">
+                <div class="stat">
+                    <div class="stat-number">$2.8M</div>
+                    <div class="stat-label">Precio promedio BYD</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-number">20%</div>
+                    <div class="stat-label">Más valor vs. dealer</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-number">3 días</div>
+                    <div class="stat-label">Tiempo promedio venta</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="features" id="features">
+        <h2>¿Por qué VendeBYD?</h2>
+        <div class="features-grid">
+            <div class="feature-card">
+                <div class="feature-icon">⚡</div>
+                <h3>Rápido y seguro</h3>
+                <p>Vende tu auto en 3 días. Verificación RENAPER instantánea, escrow seguro, sin fraude.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">💰</div>
+                <h3>Más dinero en tu bolsillo</h3>
+                <p>Comisión del 3% vs. 15-25% de los dealers. Gana hasta 400K ARS más en tu venta.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">📋</div>
+                <h3>Trámites sin stress</h3>
+                <p>Impuestos, RENAPER, seguros automáticos. No visitas a dependencias, todo online.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">🔒</div>
+                <h3>Confianza garantizada</h3>
+                <p>Inspección de mecánico certificado, garantía BYD activada, comprador verificado.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">🌟</div>
+                <h3>Valoración justa</h3>
+                <p>Ve el historial de precios de tu modelo. Fija el precio con datos reales.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">🎁</div>
+                <h3>Referidos = dinero</h3>
+                <p>Refiere a un amigo que venda → ambos ganan crédito de 8K ARS.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- How It Works -->
+    <section class="how-it-works" id="how">
+        <div class="how-it-works-content">
+            <h2>¿Cómo funciona?</h2>
+            <div class="steps">
+                <div class="step">
+                    <div class="step-number">1</div>
+                    <h3>Registra tu auto</h3>
+                    <p>VIN, fotos, precio. 5 minutos. Verificación automática RENAPER.</p>
+                </div>
+                <div class="step">
+                    <div class="step-number">2</div>
+                    <h3>Comprador interesado</h3>
+                    <p>Busca, inspecciona con mecánico certificado, hace oferta.</p>
+                </div>
+                <div class="step">
+                    <div class="step-number">3</div>
+                    <h3>Acuerdo en escrow</h3>
+                    <p>Depósito asegurado. Contrato digital firmado por ambos.</p>
+                </div>
+                <div class="step">
+                    <div class="step-number">4</div>
+                    <h3>Impuestos + RENAPER</h3>
+                    <p>Nosotros gestionamos AFIP, RENAPER, seguro. Tú recibes el dinero.</p>
+                </div>
+                <div class="step">
+                    <div class="step-number">5</div>
+                    <h3>Entrega a domicilio</h3>
+                    <p>Comprador retira con papeles nuevos. Vos recibiste el 97% del precio.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Dealer Partnership Section -->
+    <section class="dealer-section" id="partners">
+        <div class="dealer-content">
+            <div class="dealer-text">
+                <h2>Para concesionarios y dealers</h2>
+                <p>Colaboración win-win: ustedes traen vendedores, nosotros cerramos las ventas.</p>
+                <ul class="dealer-benefits">
+                    <li>50K ARS por cada vendedor que refieran</li>
+                    <li>5% comisión en primeras 5 ventas del referido</li>
+                    <li>Dashboard para tracking de referidos y ganancias</li>
+                    <li>Beneficios exclusivos para dealers platinum</li>
+                    <li>Inventario 0km vendido en nuestra plataforma</li>
+                </ul>
+                <button class="btn btn-primary" onclick="openModal('dealers')" style="margin-top: 1.5rem;">Quiero asociarme</button>
+            </div>
+            <div style="text-align: center; font-size: 64px; opacity: 0.3;">
+                🤝
+            </div>
+        </div>
+    </section>
+
+    <!-- Trust Signals -->
+    <section class="trust-section" id="trust">
+        <h2>¿Por qué confiar en nosotros?</h2>
+        <div class="trust-grid">
+            <div class="trust-item">
+                <div class="trust-item-icon">✓</div>
+                <h3>RENAPER verificado</h3>
+                <p>Cada auto se verifica instantáneamente. No hay autos con deuda o clonados.</p>
+            </div>
+            <div class="trust-item">
+                <div class="trust-item-icon">🏦</div>
+                <h3>Escrow asegurado</h3>
+                <p>Dinero en terceros hasta que se transfiera el título. 100% seguro.</p>
+            </div>
+            <div class="trust-item">
+                <div class="trust-item-icon">⚖️</div>
+                <h3>Cumplimiento AFIP</h3>
+                <p>Trámites tributarios automáticos, reportes legales, impuestos claros.</p>
+            </div>
+            <div class="trust-item">
+                <div class="trust-item-icon">🔧</div>
+                <h3>Garantía BYD</h3>
+                <p>Cada auto se activa con garantía oficial de 3 años. Servicio certificado.</p>
+            </div>
+            <div class="trust-item">
+                <div class="trust-item-icon">🎯</div>
+                <h3>Inspección obligatoria</h3>
+                <p>Mecánico certificado verifica cada vehículo. Reporte en la plataforma.</p>
+            </div>
+            <div class="trust-item">
+                <div class="trust-item-icon">📱</div>
+                <h3>Soporte 24/7</h3>
+                <p>Chat en vivo, email, teléfono. Respondemos en 30 minutos.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Pricing -->
+    <section class="pricing" id="pricing">
+        <h2>¿Cuánto cuesta?</h2>
+        <div class="pricing-grid">
+            <div class="pricing-card">
+                <h3>Para vendedores</h3>
+                <div class="pricing-price">3%</div>
+                <p class="pricing-desc">Comisión por venta</p>
+                <ul class="pricing-features">
+                    <li>Listar gratis</li>
+                    <li>Inspección incluida</li>
+                    <li>Trámites AFIP/RENAPER incluidos</li>
+                    <li>Seguro coordinado</li>
+                </ul>
+            </div>
+            <div class="pricing-card featured">
+                <h3>Para compradores</h3>
+                <div class="pricing-price">0%</div>
+                <p class="pricing-desc">Sin costo adicional</p>
+                <ul class="pricing-features">
+                    <li>Búsqueda y filtros</li>
+                    <li>Inspección mecánica</li>
+                    <li>Financing integrado</li>
+                    <li>Referir amigos = crédito</li>
+                </ul>
+            </div>
+            <div class="pricing-card">
+                <h3>Para dealers</h3>
+                <div class="pricing-price">50K+</div>
+                <p class="pricing-desc">Referral bonus por vendedor</p>
+                <ul class="pricing-features">
+                    <li>Comisión continuada (5%)</li>
+                    <li>Dashboard dedicado</li>
+                    <li>Co-marketing allowance</li>
+                    <li>Prioridad soporte</li>
+                </ul>
+            </div>
+        </div>
+    </section>
+
+    <!-- Final CTA -->
+    <section class="final-cta">
+        <h2>¿Estás listo?</h2>
+        <p>Únete a la revolución del auto usado en Argentina. Primeros 50 vendedores get 20K ARS de crédito.</p>
+        <button class="btn btn-primary" onclick="openModal('sellers')">Registra tu BYD ahora</button>
+    </section>
+
+    <!-- Modals -->
+    <div id="sellersModal" class="modal">
+        <div class="modal-content">
+            <span class="modal-close" onclick="closeModal('sellersModal')">&times;</span>
+            <h2 style="margin-bottom: 1.5rem;">Registra tu BYD</h2>
+            <form onsubmit="handleSubmit(event, 'seller')">
+                <div class="form-group">
+                    <label>Nombre completo</label>
+                    <input type="text" required>
+                </div>
+                <div class="form-group">
+                    <label>Teléfono</label>
+                    <input type="tel" required>
+                </div>
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" required>
+                </div>
+                <div class="form-group">
+                    <label>Modelo BYD</label>
+                    <select required>
+                        <option>-- Selecciona --</option>
+                        <option>BYD Seagull</option>
+                        <option>BYD Yuan Plus</option>
+                        <option>BYD Song</option>
+                        <option>BYD Atto 3</option>
+                        <option>Otro</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Año del auto</label>
+                    <select required>
+                        <option>-- Selecciona --</option>
+                        <option>2024</option>
+                        <option>2023</option>
+                        <option>2022</option>
+                        <option>Anterior</option>
+                    </select>
+                </div>
+                <button type="submit" class="form-submit">Registrarme (es gratis)</button>
+            </form>
+            <p style="text-align: center; margin-top: 1rem; font-size: 12px; color: #999;">No compartimos tus datos. Privacidad garantizada.</p>
+        </div>
+    </div>
+
+    <div id="dealersModal" class="modal">
+        <div class="modal-content">
+            <span class="modal-close" onclick="closeModal('dealersModal')">&times;</span>
+            <h2 style="margin-bottom: 1.5rem;">Programa de dealers</h2>
+            <form onsubmit="handleSubmit(event, 'dealer')">
+                <div class="form-group">
+                    <label>Nombre concesionario</label>
+                    <input type="text" required>
+                </div>
+                <div class="form-group">
+                    <label>Tu nombre</label>
+                    <input type="text" required>
+                </div>
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" required>
+                </div>
+                <div class="form-group">
+                    <label>Teléfono</label>
+                    <input type="tel" required>
+                </div>
+                <div class="form-group">
+                    <label>¿Qué marcas vendes?</label>
+                    <input type="text" placeholder="BYD, Li Auto, etc.">
+                </div>
+                <button type="submit" class="form-submit">Solicitar asociación</button>
+            </form>
+            <p style="text-align: center; margin-top: 1rem; font-size: 12px; color: #999;">Te contactaremos en 24 horas.</p>
+        </div>
+    </div>
+
+    <div id="contactModal" class="modal">
+        <div class="modal-content">
+            <span class="modal-close" onclick="closeModal('contactModal')">&times;</span>
+            <h2 style="margin-bottom: 1.5rem;">Contáctanos</h2>
+            <form onsubmit="handleSubmit(event, 'contact')">
+                <div class="form-group">
+                    <label>Nombre</label>
+                    <input type="text" required>
+                </div>
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" required>
+                </div>
+                <div class="form-group">
+                    <label>Asunto</label>
+                    <input type="text" required>
+                </div>
+                <div class="form-group">
+                    <label>Mensaje</label>
+                    <textarea style="padding: 12px; border: 1px solid #ddd; border-radius: 6px; font-family: inherit; resize: vertical; height: 120px;" required></textarea>
+                </div>
+                <button type="submit" class="form-submit">Enviar</button>
+            </form>
+        </div>
+    </div>
+
+    <footer>
+        <p>&copy; 2025 VendeBYD. Todos los derechos reservados. | Privacidad | Términos</p>
+    </footer>
+
+    <script>
+        function openModal(type) {
+            if (type === 'sellers') document.getElementById('sellersModal').classList.add('active');
+            if (type === 'dealers') document.getElementById('dealersModal').classList.add('active');
+            if (type === 'contact') document.getElementById('contactModal').classList.add('active');
+        }
+
+        function closeModal(id) {
+            document.getElementById(id).classList.remove('active');
+        }
+
+        function handleSubmit(event, type) {
+            event.preventDefault();
+            const formData = new FormData(event.target);
+            const data = Object.fromEntries(formData);
+            
+            // In production, send to your backend/email service
+            console.log(`${type} signup:`, data);
+            alert(`¡Gracias por registrarte! Te contactaremos pronto.`);
+            event.target.reset();
+            closeModal(event.target.closest('.modal').id);
+        }
+
+        // Close modal when clicking outside
+        window.addEventListener('click', function(event) {
+            if (event.target.classList.contains('modal')) {
+                event.target.classList.remove('active');
+            }
+        });
+
+        // Smooth scrolling
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                const href = this.getAttribute('href');
+                if (href !== '#') {
+                    e.preventDefault();
+                    const target = document.querySelector(href);
+                    if (target) {
+                        target.scrollIntoView({ behavior: 'smooth' });
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+</html>
