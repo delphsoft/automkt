@@ -1,101 +1,65 @@
-'use client';
-
-import { useState, useEffect } from 'react';
-import { User as FirebaseUser } from 'firebase/auth';
-import {
-  createUserWithEmailAndPassword,
-  signInWithEmailAndPassword,
-  signOut,
-  onAuthStateChanged,
-} from 'firebase/auth';
-import { ref, set, get } from 'firebase/database';
-import { auth, db } from '@/lib/firebase';
-import { User } from '@/lib/types';
+'use client'
+import { useState, useEffect } from 'react'
+import { supabase } from '@/lib/supabase'
+import { UserProfile } from '@/lib/types'
+import { User } from '@supabase/supabase-js'
 
 export const useAuth = () => {
-  const [user, setUser] = useState<User | null>(null);
-  const [firebaseUser, setFirebaseUser] = useState<FirebaseUser | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [user, setUser] = useState<UserProfile | null>(null)
+  const [authUser, setAuthUser] = useState<User | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (fbUser) => {
-      if (fbUser) {
-        try {
-          const userRef = ref(db, `users/${fbUser.uid}`);
-          const snapshot = await get(userRef);
-          setUser(snapshot.val());
-        } catch (err) {
-          console.error('Error fetching user profile:', err);
-        }
-      } else {
-        setUser(null);
-      }
-      setFirebaseUser(fbUser);
-      setLoading(false);
-    });
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setAuthUser(session?.user ?? null)
+      if (session?.user) fetchProfile(session.user.id)
+      else setLoading(false)
+    })
 
-    return unsubscribe;
-  }, []);
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setAuthUser(session?.user ?? null)
+      if (session?.user) fetchProfile(session.user.id)
+      else { setUser(null); setLoading(false) }
+    })
 
-  const signup = async (
-    email: string,
-    password: string,
-    profile: Omit<User, 'uid'>
-  ) => {
-    try {
-      setError(null);
-      const result = await createUserWithEmailAndPassword(auth, email, password);
-      
-      const userProfile: User = {
-        ...profile,
-        uid: result.user.uid,
-      };
-      
-      await set(ref(db, `users/${result.user.uid}`), userProfile);
-      return result.user;
-    } catch (err: any) {
-      const message = err.code === 'auth/email-already-in-use'
-        ? 'El email ya está registrado'
-        : err.message;
-      setError(message);
-      throw err;
+    return () => subscription.unsubscribe()
+  }, [])
+
+  const fetchProfile = async (id: string) => {
+    const { data } = await supabase.from('profiles').select('*').eq('id', id).single()
+    setUser(data)
+    setLoading(false)
+  }
+
+  const signup = async (email: string, password: string, profile: Omit<UserProfile, 'id' | 'created_at' | 'rating'>) => {
+    setError(null)
+    const { data, error: authError } = await supabase.auth.signUp({ email, password })
+    if (authError) { setError(authError.message); throw authError }
+    if (data.user) {
+      await supabase.from('profiles').insert({
+        id: data.user.id,
+        email,
+        name: profile.name,
+        phone: profile.phone,
+        user_type: profile.user_type,
+        cuit: profile.cuit ?? null,
+        rating: 5,
+      })
     }
-  };
+    return data.user
+  }
 
   const login = async (email: string, password: string) => {
-    try {
-      setError(null);
-      return await signInWithEmailAndPassword(auth, email, password);
-    } catch (err: any) {
-      const message = err.code === 'auth/user-not-found'
-        ? 'Usuario no encontrado'
-        : err.code === 'auth/wrong-password'
-        ? 'Contraseña incorrecta'
-        : err.message;
-      setError(message);
-      throw err;
-    }
-  };
+    setError(null)
+    const { error: authError } = await supabase.auth.signInWithPassword({ email, password })
+    if (authError) { setError(authError.message); throw authError }
+  }
 
   const logout = async () => {
-    try {
-      setError(null);
-      await signOut(auth);
-    } catch (err: any) {
-      setError(err.message);
-      throw err;
-    }
-  };
+    await supabase.auth.signOut()
+    setUser(null)
+  }
 
-  return {
-    user,
-    firebaseUser,
-    loading,
-    error,
-    signup,
-    login,
-    logout,
-    isAuthenticated: !!user,
-  };
-};
+  return { user, authUser, loading, error, signup, login, logout, isAuthenticated: !!authUser }
+}

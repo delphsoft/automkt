@@ -1,117 +1,77 @@
-import Link from 'next/link';
+import Link from 'next/link'
+import Navigation from '@/components/Navigation'
 
 export default function Home() {
   return (
     <div className="min-h-screen">
-      {/* Header */}
-      <header className="bg-white border-b border-gray-200 sticky top-0 z-50">
-        <nav className="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
-          <Link href="/" className="text-2xl font-bold text-blue-600">
-            VendeBYD
-          </Link>
-          <div className="flex gap-4">
-            <Link href="/browse" className="text-gray-600 hover:text-blue-600">
-              Buscar
-            </Link>
-            <Link href="/sell" className="text-gray-600 hover:text-blue-600">
-              Vender
-            </Link>
-          </div>
-        </nav>
-      </header>
+      <Navigation />
 
-      {/* Hero */}
-      <section className="bg-gradient-to-r from-blue-50 to-white py-20 px-4">
+      <section className="bg-gradient-to-br from-blue-50 to-white py-24 px-4">
         <div className="max-w-3xl mx-auto text-center">
-          <h1 className="text-5xl font-bold mb-4">Vende tu BYD sin comisión</h1>
-          <p className="text-xl text-gray-600 mb-8">
-            La primera plataforma P2P para vender autos chinos en Argentina. En 3 días, sin intermediarios.
+          <span className="inline-block bg-blue-100 text-blue-700 text-sm font-semibold px-4 py-1 rounded-full mb-6">
+            🇦🇷 Primera plataforma P2P de autos chinos en Argentina
+          </span>
+          <h1 className="text-5xl font-bold mb-5 leading-tight">
+            Vendé tu BYD sin<br />comisión, en 3 días
+          </h1>
+          <p className="text-xl text-gray-600 mb-10 max-w-xl mx-auto">
+            Sin intermediarios. Verificación RENAPER automática, trámites incluidos, escrow seguro.
           </p>
           <div className="flex gap-4 justify-center flex-wrap">
-            <Link
-              href="/sell"
-              className="bg-blue-600 text-white px-8 py-3 rounded-lg font-semibold hover:bg-blue-700"
-            >
-              Registra tu auto
+            <Link href="/sell" className="bg-blue-600 text-white px-8 py-4 rounded-xl font-bold text-lg hover:bg-blue-700 transition-colors">
+              Publicar mi BYD
             </Link>
-            <Link
-              href="/browse"
-              className="bg-white text-blue-600 border-2 border-blue-600 px-8 py-3 rounded-lg font-semibold hover:bg-blue-50"
-            >
+            <Link href="/browse" className="bg-white text-blue-600 border-2 border-blue-600 px-8 py-4 rounded-xl font-bold text-lg hover:bg-blue-50 transition-colors">
               Buscar autos
             </Link>
           </div>
 
-          {/* Stats */}
-          <div className="grid grid-cols-3 gap-4 mt-12">
-            <div>
-              <p className="text-3xl font-bold text-blue-600">$2.8M</p>
-              <p className="text-gray-600">Precio promedio</p>
-            </div>
-            <div>
-              <p className="text-3xl font-bold text-blue-600">20%</p>
-              <p className="text-gray-600">Más valor vs dealer</p>
-            </div>
-            <div>
-              <p className="text-3xl font-bold text-blue-600">3 días</p>
-              <p className="text-gray-600">Tiempo promedio</p>
-            </div>
+          <div className="grid grid-cols-3 gap-6 mt-16 max-w-lg mx-auto">
+            {[
+              { n: '3%', l: 'comisión vs 20% dealer' },
+              { n: '3 días', l: 'tiempo promedio de venta' },
+              { n: '100%', l: 'legal con RENAPER' },
+            ].map(({ n, l }) => (
+              <div key={n} className="text-center">
+                <p className="text-3xl font-bold text-blue-600">{n}</p>
+                <p className="text-sm text-gray-500 mt-1">{l}</p>
+              </div>
+            ))}
           </div>
         </div>
       </section>
 
-      {/* Features */}
       <section className="py-20 px-4 max-w-6xl mx-auto">
-        <h2 className="text-4xl font-bold text-center mb-12">¿Por qué VendeBYD?</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <h2 className="text-3xl font-bold text-center mb-12">¿Por qué VendeBYD?</h2>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {[
-            {
-              icon: '⚡',
-              title: 'Rápido y seguro',
-              desc: 'Vende en 3 días con verificación RENAPER y escrow seguro',
-            },
-            {
-              icon: '💰',
-              title: 'Más dinero',
-              desc: 'Comisión del 3% vs 15-25% de los dealers',
-            },
-            {
-              icon: '📋',
-              title: 'Sin trámites',
-              desc: 'Impuestos, RENAPER y seguros automáticos',
-            },
-            {
-              icon: '🔒',
-              title: 'Confianza',
-              desc: 'Inspección certificada y garantía activada',
-            },
-            {
-              icon: '🌟',
-              title: 'Precio justo',
-              desc: 'Ve el historial de precios de tu modelo',
-            },
-            {
-              icon: '🎁',
-              title: 'Gana con referidos',
-              desc: 'Refiere amigos y gana crédito',
-            },
-          ].map((feature, i) => (
-            <div key={i} className="p-6 border border-gray-200 rounded-lg hover:shadow-lg transition">
-              <p className="text-4xl mb-4">{feature.icon}</p>
-              <h3 className="font-bold text-lg mb-2">{feature.title}</h3>
-              <p className="text-gray-600">{feature.desc}</p>
+            { icon: '⚡', title: 'Rápido y seguro', desc: 'VIN verificado con RENAPER, escrow seguro, cierre en 3 días.' },
+            { icon: '💰', title: 'Más plata para vos', desc: '3% de comisión vs 15-25% de los dealers. Guardá hasta $400K más.' },
+            { icon: '📋', title: 'Sin trámites', desc: 'AFIP, RENAPER, seguro y garantía BYD gestionados automáticamente.' },
+            { icon: '🔒', title: 'Confianza total', desc: 'Inspección de mecánico certificado BYD incluida.' },
+            { icon: '🏦', title: 'Financiación integrada', desc: 'Pre-aprobación con Ualá y Mercado Crédito en 60 segundos.' },
+            { icon: '🎁', title: 'Programa de referidos', desc: 'Referí un amigo → ambos ganan 8.000 ARS de crédito.' },
+          ].map(({ icon, title, desc }) => (
+            <div key={title} className="bg-white border border-gray-200 rounded-xl p-6 hover:shadow-md transition-shadow">
+              <span className="text-4xl">{icon}</span>
+              <h3 className="font-bold text-lg mt-3 mb-2">{title}</h3>
+              <p className="text-gray-600 text-sm">{desc}</p>
             </div>
           ))}
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="bg-gray-900 text-white py-8 px-4 mt-20">
-        <div className="max-w-6xl mx-auto text-center">
-          <p>&copy; 2024 VendeBYD. Todos los derechos reservados.</p>
-          <p className="text-gray-400 mt-2">La primera plataforma P2P para vender autos chinos en Argentina</p>
-        </div>
+      <section className="bg-blue-600 text-white py-16 px-4 text-center">
+        <h2 className="text-3xl font-bold mb-4">Primeros 50 vendedores: publicación gratis</h2>
+        <p className="text-blue-100 mb-8">Más de 20% de valor adicional vs. entregar el auto al concesionario</p>
+        <Link href="/auth/signup" className="bg-white text-blue-600 font-bold px-8 py-4 rounded-xl text-lg hover:bg-blue-50">
+          Registrarme ahora
+        </Link>
+      </section>
+
+      <footer className="bg-gray-900 text-gray-400 text-sm text-center py-8">
+        <p>© 2025 VendeBYD · La primera plataforma P2P para autos chinos en Argentina</p>
       </footer>
     </div>
-  );
+  )
 }

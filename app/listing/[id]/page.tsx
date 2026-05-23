@@ -1,185 +1,154 @@
-'use client';
-
-import { useEffect, useState } from 'react';
-import { useListings } from '@/hooks/useListings';
-import { useAuth } from '@/hooks/useAuth';
-import { useMessages } from '@/hooks/useMessages';
-import { Listing } from '@/lib/types';
-import Link from 'next/link';
-import toast from 'react-hot-toast';
+'use client'
+import { useEffect, useState } from 'react'
+import { useAuth } from '@/hooks/useAuth'
+import { useListings } from '@/hooks/useListings'
+import { useMessages } from '@/hooks/useMessages'
+import { useOffers } from '@/hooks/useOffers'
+import { Listing } from '@/lib/types'
+import { formatPrice, conditionLabel } from '@/lib/utils'
+import Navigation from '@/components/Navigation'
+import Link from 'next/link'
+import toast from 'react-hot-toast'
 
 export default function ListingDetail({ params }: { params: { id: string } }) {
-  const { getListing } = useListings();
-  const { user, firebaseUser } = useAuth();
-  const { startConversation } = useMessages(firebaseUser?.uid || null);
+  const { user, authUser } = useAuth()
+  const { getListing } = useListings()
+  const { startConversation } = useMessages(authUser?.id ?? null)
+  const { makeOffer } = useOffers(authUser?.id ?? null)
 
-  const [listing, setListing] = useState<Listing | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0);
+  const [listing, setListing] = useState<Listing | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [photoIdx, setPhotoIdx] = useState(0)
+  const [offerAmount, setOfferAmount] = useState('')
+  const [offerMsg, setOfferMsg] = useState('')
+  const [showOffer, setShowOffer] = useState(false)
 
   useEffect(() => {
-    (async () => {
-      const data = await getListing(params.id);
-      setListing(data);
-      setLoading(false);
-    })();
-  }, [params.id, getListing]);
+    getListing(params.id).then((data) => { setListing(data); setLoading(false) })
+  }, [params.id, getListing])
 
   const handleContact = async () => {
-    if (!firebaseUser || !user) {
-      toast.error('Por favor inicia sesión primero');
-      return;
-    }
-
+    if (!authUser || !user || !listing) { toast.error('Iniciá sesión primero'); return }
     try {
-      await startConversation(
-        firebaseUser.uid,
-        user.name,
-        listing!.sellerId,
-        listing!.sellerName,
-        listing!.id
-      );
-      toast.success('¡Conversación iniciada!');
-    } catch (error) {
-      toast.error('Error al iniciar conversación');
-    }
-  };
+      await startConversation(authUser.id, user.name, listing.seller_id, listing.seller_name, listing.id)
+      toast.success('¡Conversación iniciada! Revisá tu bandeja.')
+    } catch { toast.error('Error al iniciar conversación') }
+  }
 
-  if (loading) return <div className="text-center py-12">Cargando...</div>;
-  if (!listing) return <div className="text-center py-12">Auto no encontrado</div>;
+  const handleOffer = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!authUser || !user || !listing) return
+    try {
+      await makeOffer(listing.id, authUser.id, user.name, +offerAmount, offerMsg)
+      toast.success('¡Oferta enviada!')
+      setShowOffer(false)
+    } catch { toast.error('Error al enviar oferta') }
+  }
 
-  const formatPrice = (price: number) =>
-    new Intl.NumberFormat('es-AR', {
-      style: 'currency',
-      currency: 'ARS',
-      maximumFractionDigits: 0,
-    }).format(price);
+  if (loading) return <div className="min-h-screen flex items-center justify-center"><p className="text-gray-400 animate-pulse">Cargando...</p></div>
+  if (!listing) return <div className="min-h-screen flex items-center justify-center"><p>Auto no encontrado. <Link href="/browse" className="text-blue-600">Volver</Link></p></div>
+
+  const isSeller = authUser?.id === listing.seller_id
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <header className="bg-white border-b border-gray-200 sticky top-0 z-50">
-        <nav className="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
-          <Link href="/" className="text-2xl font-bold text-blue-600">
-            VendeBYD
-          </Link>
-          <div className="flex gap-4">
-            <Link href="/browse" className="text-gray-600 hover:text-blue-600">
-              Buscar
-            </Link>
-            <Link href="/sell" className="text-gray-600 hover:text-blue-600">
-              Vender
-            </Link>
-          </div>
-        </nav>
-      </header>
+    <div className="min-h-screen">
+      <Navigation />
+      <div className="max-w-5xl mx-auto px-4 py-8">
+        <Link href="/browse" className="text-sm text-gray-400 hover:text-blue-600 mb-4 block">← Volver al listado</Link>
 
-      <div className="max-w-5xl mx-auto p-4 py-8">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          {/* Photos */}
           <div>
-            <img
-              src={listing.photoUrls[currentPhotoIndex]}
-              alt="Auto"
-              className="w-full h-96 object-cover rounded-lg mb-4"
-            />
-            <div className="flex gap-2 overflow-x-auto">
-              {listing.photoUrls.map((url, i) => (
-                <button
-                  key={i}
-                  onClick={() => setCurrentPhotoIndex(i)}
-                  className={`flex-shrink-0 w-16 h-16 rounded ${
-                    i === currentPhotoIndex ? 'ring-2 ring-blue-600' : ''
-                  }`}
-                >
-                  <img src={url} alt={`Foto ${i + 1}`} className="w-full h-full object-cover rounded" />
-                </button>
+            <div className="rounded-2xl overflow-hidden bg-gray-100 h-80">
+              {listing.photo_urls?.[photoIdx] ? (
+                <img src={listing.photo_urls[photoIdx]} alt={listing.model} className="w-full h-full object-cover" />
+              ) : <div className="w-full h-full flex items-center justify-center text-6xl">🚗</div>}
+            </div>
+            {listing.photo_urls?.length > 1 && (
+              <div className="flex gap-2 mt-3 overflow-x-auto">
+                {listing.photo_urls.map((url, i) => (
+                  <button key={i} onClick={() => setPhotoIdx(i)} className={`flex-shrink-0 w-14 h-14 rounded-lg overflow-hidden border-2 ${i === photoIdx ? 'border-blue-600' : 'border-transparent'}`}>
+                    <img src={url} alt="" className="w-full h-full object-cover" />
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+
+          <div>
+            <h1 className="text-3xl font-bold mb-1">{listing.brand} {listing.model}</h1>
+            <p className="text-gray-500 mb-4">{listing.year} · {listing.odometer.toLocaleString()}km · {conditionLabel[listing.condition]} · {listing.color}</p>
+
+            <div className="bg-blue-50 rounded-xl p-4 mb-6">
+              <p className="text-4xl font-bold text-blue-600">{formatPrice(listing.price)}</p>
+              {listing.vat > 0 && <p className="text-sm text-gray-500 mt-1">+ {formatPrice(listing.vat)} IVA → Total: {formatPrice(listing.final_price)}</p>}
+              {listing.vat === 0 && <p className="text-sm text-green-600 mt-1">✓ Exento de IVA (primera venta)</p>}
+            </div>
+
+            <div className="grid grid-cols-2 gap-3 mb-6 text-sm">
+              {[
+                ['📍 Ubicación', `${listing.city}, ${listing.province}`],
+                ['🔑 VIN', listing.vin],
+                ['✅ Estado', listing.verification_status === 'verified' ? 'Verificado RENAPER' : 'Pendiente'],
+                ['📅 Publicado', new Date(listing.created_at).toLocaleDateString('es-AR')],
+              ].map(([k, v]) => (
+                <div key={k} className="bg-gray-50 rounded-lg p-3">
+                  <p className="text-gray-500 text-xs">{k}</p>
+                  <p className="font-semibold mt-0.5">{v}</p>
+                </div>
               ))}
             </div>
-          </div>
 
-          {/* Details */}
-          <div>
-            <h1 className="text-4xl font-bold mb-2">
-              {listing.carData.brand} {listing.carData.model}
-            </h1>
-            <p className="text-gray-600 mb-4">
-              {listing.carData.year} • {listing.carData.odometer}km • {listing.carData.condition}
-            </p>
+            {listing.description && (
+              <div className="mb-6">
+                <p className="text-sm font-semibold text-gray-700 mb-1">Descripción</p>
+                <p className="text-gray-600 text-sm leading-relaxed">{listing.description}</p>
+              </div>
+            )}
 
-            {/* Price */}
-            <div className="bg-blue-50 p-6 rounded-lg mb-6">
-              <p className="text-sm text-gray-600 mb-2">Precio</p>
-              <p className="text-5xl font-bold text-blue-600 mb-2">{formatPrice(listing.price)}</p>
-              {listing.vat > 0 && (
-                <p className="text-sm text-gray-600">+ {formatPrice(listing.vat)} (impuesto)</p>
-              )}
-            </div>
-
-            {/* Details */}
-            <div className="space-y-4 mb-6">
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <p className="text-gray-600 text-sm">Ubicación</p>
-                  <p className="font-semibold">{listing.carData.city}</p>
-                </div>
-                <div>
-                  <p className="text-gray-600 text-sm">Color</p>
-                  <p className="font-semibold">{listing.carData.color}</p>
-                </div>
-                <div>
-                  <p className="text-gray-600 text-sm">VIN</p>
-                  <p className="font-semibold text-xs">{listing.carData.vin}</p>
-                </div>
-                <div>
-                  <p className="text-gray-600 text-sm">Estado</p>
-                  <p className="font-semibold capitalize">{listing.carData.condition}</p>
-                </div>
+            <div className="flex items-center gap-3 mb-6 p-3 bg-gray-50 rounded-xl">
+              <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center font-bold text-blue-600">
+                {listing.seller_name.charAt(0).toUpperCase()}
+              </div>
+              <div>
+                <p className="font-semibold">{listing.seller_name}</p>
+                <p className="text-xs text-gray-400">⭐ {listing.seller_rating} · Vendedor verificado</p>
               </div>
             </div>
 
-            {/* Description */}
-            <div className="mb-6">
-              <p className="text-gray-600 text-sm mb-2">Descripción</p>
-              <p className="text-gray-700">{listing.carData.description}</p>
-            </div>
-
-            {/* Seller */}
-            <div className="border-t pt-6">
-              <div className="flex items-center gap-4 mb-6">
-                <div className="w-12 h-12 bg-blue-200 rounded-full flex items-center justify-center font-bold text-lg">
-                  {listing.sellerName.charAt(0)}
-                </div>
-                <div>
-                  <p className="font-semibold">{listing.sellerName}</p>
-                  <p className="text-gray-600">⭐ {listing.sellerRating} (vendedor)</p>
-                </div>
+            {!isSeller && (
+              <div className="space-y-3">
+                <button onClick={handleContact} className="w-full bg-blue-600 text-white font-bold py-3 rounded-xl hover:bg-blue-700 transition-colors">
+                  Contactar vendedor
+                </button>
+                <button onClick={() => setShowOffer(!showOffer)} className="w-full border-2 border-blue-600 text-blue-600 font-bold py-3 rounded-xl hover:bg-blue-50 transition-colors">
+                  Hacer una oferta
+                </button>
+                {showOffer && (
+                  <form onSubmit={handleOffer} className="bg-gray-50 rounded-xl p-4 space-y-3">
+                    <div>
+                      <label className="text-sm font-semibold block mb-1">Monto de la oferta (ARS)</label>
+                      <input type="number" value={offerAmount} onChange={(e) => setOfferAmount(e.target.value)} required placeholder={String(listing.price)} className="w-full border rounded-lg px-3 py-2 text-sm" />
+                    </div>
+                    <div>
+                      <label className="text-sm font-semibold block mb-1">Mensaje</label>
+                      <textarea value={offerMsg} onChange={(e) => setOfferMsg(e.target.value)} rows={2} placeholder="¿Querés coordinar una inspección?" className="w-full border rounded-lg px-3 py-2 text-sm resize-none" />
+                    </div>
+                    <button type="submit" className="w-full bg-green-600 text-white font-bold py-2 rounded-lg hover:bg-green-700 text-sm">
+                      Enviar oferta
+                    </button>
+                  </form>
+                )}
               </div>
+            )}
 
-              {/* Actions */}
-              {firebaseUser?.uid !== listing.sellerId && (
-                <div className="space-y-3">
-                  <button
-                    onClick={handleContact}
-                    className="w-full bg-blue-600 text-white font-bold py-3 rounded-lg hover:bg-blue-700"
-                  >
-                    Contactar vendedor
-                  </button>
-                  <button className="w-full border-2 border-blue-600 text-blue-600 font-bold py-3 rounded-lg hover:bg-blue-50">
-                    Hacer oferta
-                  </button>
-                </div>
-              )}
-
-              {firebaseUser?.uid === listing.sellerId && (
-                <div className="bg-green-50 border border-green-200 p-4 rounded-lg text-green-700 text-center">
-                  ✓ Este es tu auto
-                </div>
-              )}
-            </div>
+            {isSeller && (
+              <div className="bg-green-50 border border-green-200 rounded-xl p-4 text-green-700 text-center text-sm font-semibold">
+                ✓ Este es tu anuncio
+              </div>
+            )}
           </div>
         </div>
       </div>
     </div>
-  );
+  )
 }

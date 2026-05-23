@@ -1,99 +1,34 @@
-'use client';
+'use client'
+import { useState, useEffect } from 'react'
+import { supabase } from '@/lib/supabase'
+import { Offer } from '@/lib/types'
 
-import { useState, useEffect } from 'react';
-import { ref, push, set, onValue } from 'firebase/database';
-import { db } from '@/lib/firebase';
-import { Offer } from '@/lib/types';
-
-export const useOffers = (userUID: string | null) => {
-  const [offers, setOffers] = useState<Offer[]>([]);
-  const [loading, setLoading] = useState(false);
+export const useOffers = (userId: string | null) => {
+  const [offers, setOffers] = useState<Offer[]>([])
+  const [loading, setLoading] = useState(false)
 
   useEffect(() => {
-    if (!userUID) return;
+    if (!userId) return
+    supabase.from('offers').select('*').or(`buyer_id.eq.${userId}`).order('created_at', { ascending: false })
+      .then(({ data }) => { if (data) setOffers(data) })
+  }, [userId])
 
-    const offersRef = ref(db, 'offers');
-    onValue(offersRef, (snapshot) => {
-      const data = snapshot.val();
-      if (data) {
-        const userOffers = Object.entries(data)
-          .filter(([_, offer]: any) => offer.buyerId === userUID)
-          .map(([id, offer]: any) => ({ id, ...offer }));
-        setOffers(userOffers);
-      } else {
-        setOffers([]);
-      }
-    });
-  }, [userUID]);
-
-  const makeOffer = async (
-    listingId: string,
-    buyerId: string,
-    buyerName: string,
-    amount: number,
-    message: string
-  ): Promise<Offer> => {
+  const makeOffer = async (listingId: string, buyerId: string, buyerName: string, amount: number, message: string): Promise<Offer> => {
+    setLoading(true)
     try {
-      setLoading(true);
-      const offerRef = push(ref(db, 'offers'));
-      const depositAmount = Math.round(amount * 0.1);
-      
-      const offer: Offer = {
-        id: offerRef.key!,
-        listingId,
-        buyerId,
-        buyerName,
-        amount,
-        status: 'pending',
-        depositAmount,
-        depositStatus: 'pending',
-        message,
-        createdAt: Date.now(),
-        updatedAt: Date.now(),
-      };
+      const { data, error } = await supabase.from('offers').insert({
+        listing_id: listingId, buyer_id: buyerId, buyer_name: buyerName,
+        amount, status: 'pending', deposit_amount: Math.round(amount * 0.1), message,
+      }).select().single()
+      if (error) throw error
+      return data
+    } finally { setLoading(false) }
+  }
 
-      await set(offerRef, offer);
-      return offer;
-    } catch (error) {
-      console.error('Error making offer:', error);
-      throw error;
-    } finally {
-      setLoading(false);
-    }
-  };
+  const updateOfferStatus = async (offerId: string, status: 'accepted' | 'rejected') => {
+    await supabase.from('offers').update({ status }).eq('id', offerId)
+    setOffers((prev) => prev.map((o) => o.id === offerId ? { ...o, status } : o))
+  }
 
-  const acceptOffer = async (offerId: string) => {
-    try {
-      setLoading(true);
-      await set(ref(db, `offers/${offerId}/status`), 'accepted');
-      await set(ref(db, `offers/${offerId}/depositStatus`), 'secured');
-      await set(ref(db, `offers/${offerId}/updatedAt`), Date.now());
-    } catch (error) {
-      console.error('Error accepting offer:', error);
-      throw error;
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const rejectOffer = async (offerId: string) => {
-    try {
-      setLoading(true);
-      await set(ref(db, `offers/${offerId}/status`), 'rejected');
-      await set(ref(db, `offers/${offerId}/updatedAt`), Date.now());
-    } catch (error) {
-      console.error('Error rejecting offer:', error);
-      throw error;
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  return {
-    offers,
-    loading,
-    makeOffer,
-    acceptOffer,
-    rejectOffer,
-  };
-};
+  return { offers, loading, makeOffer, updateOfferStatus }
+}

@@ -1,112 +1,81 @@
-'use client';
+'use client'
+import { useState, useEffect } from 'react'
+import { supabase } from '@/lib/supabase'
+import { Conversation, Message } from '@/lib/types'
 
-import { useState, useEffect } from 'react';
-import { ref, push, set, onValue } from 'firebase/database';
-import { db } from '@/lib/firebase';
-import { Message, Conversation } from '@/lib/types';
-
-export const useMessages = (userUID: string | null) => {
-  const [conversations, setConversations] = useState<Conversation[]>([]);
-  const [selectedConversation, setSelectedConversation] = useState<string | null>(null);
-  const [messages, setMessages] = useState<Message[]>([]);
+export const useMessages = (userId: string | null) => {
+  const [conversations, setConversations] = useState<Conversation[]>([])
+  const [messages, setMessages] = useState<Message[]>([])
+  const [selectedConvId, setSelectedConvId] = useState<string | null>(null)
 
   useEffect(() => {
-    if (!userUID) return;
+    if (!userId) return
+    fetchConversations()
 
-    const conversationsRef = ref(db, 'conversations');
-    onValue(conversationsRef, (snapshot) => {
-      const data = snapshot.val();
-      if (data) {
-        const userConversations = Object.entries(data)
-          .filter(([_, conv]: any) => conv.participants?.includes(userUID))
-          .map(([id, conv]: any) => ({ id, ...conv }));
-        setConversations(userConversations);
-      } else {
-        setConversations([]);
-      }
-    });
-  }, [userUID]);
+    const channel = supabase
+      .channel(`messages-${userId}`)
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages' }, (payload) => {
+        const msg = payload.new as Message
+        if (msg.conversation_id === selectedConvId) {
+          setMessages((prev) => [...prev, msg])
+        }
+        fetchConversations()
+      })
+      .subscribe()
+
+    return () => { supabase.removeChannel(channel) }
+  }, [userId, selectedConvId])
 
   useEffect(() => {
-    if (!selectedConversation) return;
+    if (!selectedConvId) return
+    fetchMessages(selectedConvId)
+  }, [selectedConvId])
 
-    const messagesRef = ref(db, `conversations/${selectedConversation}/messages`);
-    onValue(messagesRef, (snapshot) => {
-      const data = snapshot.val();
-      if (data) {
-        const messageList = Object.entries(data)
-          .map(([id, msg]: any) => ({ id, ...msg }))
-          .sort((a, b) => a.timestamp - b.timestamp);
-        setMessages(messageList);
-      } else {
-        setMessages([]);
-      }
-    });
-  }, [selectedConversation]);
+  const fetchConversations = async () => {
+    if (!userId) return
+    const { data } = await supabase
+      .from('conversations')
+      .select('*')
+      .or(`buyer_id.eq.${userId},seller_id.eq.${userId}`)
+      .order('last_message_at', { ascending: false })
+    if (data) setConversations(data)
+  }
+
+  const fetchMessages = async (convId: string) => {
+    const { data } = await supabase
+      .from('messages')
+      .select('*')
+      .eq('conversation_id', convId)
+      .order('created_at', { ascending: true })
+    if (data) setMessages(data)
+  }
 
   const startConversation = async (
-    buyerId: string,
-    buyerName: string,
-    sellerId: string,
-    sellerName: string,
+    buyerId: string, buyerName: string,
+    sellerId: string, sellerName: string,
     listingId: string
   ): Promise<string> => {
-    try {
-      const convRef = push(ref(db, 'conversations'));
-      const conversation: Conversation = {
-        id: convRef.key!,
-        listingId,
-        buyerId,
-        buyerName,
-        sellerId,
-        sellerName,
-        lastMessage: '',
-        lastMessageAt: Date.now(),
-        participants: [buyerId, sellerId],
-      };
-      await set(convRef, conversation);
-      return convRef.key!;
-    } catch (error) {
-      console.error('Error starting conversation:', error);
-      throw error;
-    }
-  };
+    const existing = conversations.find(
+      (c) => c.listing_id === listingId && c.buyer_id === buyerId
+    )
+    if (existing) return existing.id
 
-  const sendMessage = async (
-    conversationId: string,
-    senderId: string,
-    senderName: string,
-    text: string
-  ): Promise<Message> => {
-    try {
-      const msgRef = push(ref(db, `conversations/${conversationId}/messages`));
-      const message: Message = {
-        id: msgRef.key!,
-        conversationId,
-        senderId,
-        senderName,
-        text,
-        timestamp: Date.now(),
-        read: false,
-      };
-      await set(msgRef, message);
-      
-      await set(ref(db, `conversations/${conversationId}/lastMessageAt`), Date.now());
-      await set(ref(db, `conversations/${conversationId}/lastMessage`), text);
+    const { data, error } = await supabase
+      .from('conversations')
+      .insert({ listing_id: listingId, buyer_id: buyerId, buyer_name: buyerName, seller_id: sellerId, seller_name: sellerName, last_message: '', last_message_at: new Date().toISOString() })
+      .select()
+      .single()
+    if (error) throw error
+    return data.id
+  }
 
-      return message;
-    } catch (error) {
-      console.error('Error sending message:', error);
-      throw error;
-    }
-  };
+  const sendMessage = async (convId: string, senderId: string, senderName: string, text: string) => {
+    const { error } = await supabase.from('messages').insert({
+      conversation_id: convId, sender_id: senderId, sender_name: senderName, text, read: false,
+    })
+    if (error) throw error
+    await supabase.from('conversations').update({ last_message: text, last_message_at: new Date().toISOString() }).eq('id', convId)
+  }
 
-  return {
-    conversations,
-    selectedConversation,
-    setSelectedConversation,
-    messages,
-    startConversation,
-    sendMessage,
-  };
-};
+  return { conversations, messages, selectedConvId, setSelectedConvId, startConversation, sendMessage }
+}

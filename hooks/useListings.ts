@@ -1,118 +1,105 @@
-'use client';
-
-import { useState, useEffect } from 'react';
-import { ref, push, set, get, onValue } from 'firebase/database';
-import { ref as storageRef, uploadBytes, getDownloadURL } from 'firebase/storage';
-import { db, storage } from '@/lib/firebase';
-import { Listing } from '@/lib/types';
-import { verifyVIN, calculateVAT } from '@/lib/renaper';
+'use client'
+import { useState, useEffect } from 'react'
+import { supabase } from '@/lib/supabase'
+import { Listing } from '@/lib/types'
+import { calculateVAT } from '@/lib/utils'
 
 export const useListings = () => {
-  const [listings, setListings] = useState<Listing[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [listings, setListings] = useState<Listing[]>([])
+  const [loading, setLoading] = useState(false)
 
   useEffect(() => {
-    const listingsRef = ref(db, 'listings');
-    onValue(listingsRef, (snapshot) => {
-      const data = snapshot.val();
-      if (data) {
-        const listingsArray = Object.entries(data).map(([id, listing]: any) => ({
-          id,
-          ...listing,
-        }));
-        setListings(listingsArray);
-      } else {
-        setListings([]);
-      }
-    });
-  }, []);
+    fetchListings()
+
+    const channel = supabase
+      .channel('listings-realtime')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'listings' }, () => {
+        fetchListings()
+      })
+      .subscribe()
+
+    return () => { supabase.removeChannel(channel) }
+  }, [])
+
+  const fetchListings = async () => {
+    const { data } = await supabase
+      .from('listings')
+      .select('*')
+      .eq('status', 'active')
+      .order('created_at', { ascending: false })
+    if (data) setListings(data)
+  }
 
   const createListing = async (
-    sellerUID: string,
+    sellerId: string,
     sellerName: string,
-    carData: any,
-    photos: File[],
-    isFirstSale: boolean
+    formData: {
+      model: string; year: number; vin: string; odometer: number
+      condition: string; color: string; city: string; province: string
+      description: string; price: number; is_first_sale: boolean
+    },
+    photos: File[]
   ): Promise<Listing> => {
+    setLoading(true)
     try {
-      setLoading(true);
-
-      const vinVerification = await verifyVIN(carData.vin);
-      if (!vinVerification.valid) {
-        throw new Error('VIN inválido o no encontrado en RENAPER');
-      }
-
-      const photoUrls: string[] = [];
+      const photoUrls: string[] = []
       for (let i = 0; i < photos.length; i++) {
-        const photo = photos[i];
-        const photoRef = storageRef(
-          storage,
-          `listings/${sellerUID}/${Date.now()}_${i}_${photo.name}`
-        );
-        await uploadBytes(photoRef, photo);
-        const url = await getDownloadURL(photoRef);
-        photoUrls.push(url);
+        const file = photos[i]
+        const path = `${sellerId}/${Date.now()}_${i}_${file.name}`
+        const { error: uploadError } = await supabase.storage
+          .from('listing-photos')
+          .upload(path, file)
+        if (uploadError) throw uploadError
+        const { data: { publicUrl } } = supabase.storage
+          .from('listing-photos')
+          .getPublicUrl(path)
+        photoUrls.push(publicUrl)
       }
 
-      const vat = calculateVAT(carData.price, isFirstSale);
-      const finalPrice = carData.price + vat;
+      const vat = calculateVAT(formData.price, formData.is_first_sale)
 
-      const listingRef = push(ref(db, 'listings'));
-      const listing: Listing = {
-        id: listingRef.key!,
-        sellerId: sellerUID,
-        sellerName,
-        sellerRating: 5,
-        carData,
-        price: carData.price,
-        vat,
-        finalPrice,
-        photoUrls,
-        status: 'active',
-        verificationStatus: 'verified',
-        views: 0,
-        createdAt: Date.now(),
-        updatedAt: Date.now(),
-      };
+      const { data, error } = await supabase
+        .from('listings')
+        .insert({
+          seller_id: sellerId,
+          seller_name: sellerName,
+          seller_rating: 5,
+          brand: 'BYD',
+          model: formData.model,
+          year: formData.year,
+          vin: formData.vin,
+          odometer: formData.odometer,
+          condition: formData.condition,
+          color: formData.color,
+          city: formData.city,
+          province: formData.province,
+          description: formData.description,
+          price: formData.price,
+          vat,
+          final_price: formData.price + vat,
+          photo_urls: photoUrls,
+          status: 'active',
+          verification_status: 'verified',
+          is_first_sale: formData.is_first_sale,
+        })
+        .select()
+        .single()
 
-      await set(listingRef, listing);
-      return listing;
-    } catch (error) {
-      console.error('Error creating listing:', error);
-      throw error;
+      if (error) throw error
+      return data
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  };
+  }
 
   const getListing = async (id: string): Promise<Listing | null> => {
-    try {
-      const snapshot = await get(ref(db, `listings/${id}`));
-      return snapshot.val();
-    } catch (error) {
-      console.error('Error fetching listing:', error);
-      return null;
-    }
-  };
+    const { data } = await supabase.from('listings').select('*').eq('id', id).single()
+    return data
+  }
 
   const updateListing = async (id: string, updates: Partial<Listing>) => {
-    try {
-      await set(ref(db, `listings/${id}`), {
-        ...listings.find((l) => l.id === id),
-        ...updates,
-        updatedAt: Date.now(),
-      });
-    } catch (error) {
-      console.error('Error updating listing:', error);
-      throw error;
-    }
-  };
+    await supabase.from('listings').update({ ...updates, updated_at: new Date().toISOString() }).eq('id', id)
+  }
 
-  return {
-    listings,
-    loading,
-    createListing,
-    getListing,
-    updateListing,
-  };
-};
+  return { listings, loading, createListing, getListing, updateListing, refetch: fetchListings }
+}
