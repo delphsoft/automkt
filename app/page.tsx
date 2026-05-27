@@ -516,7 +516,7 @@ export default function Home() {
                 [`Comisión por venta`, `USD ${fmt(calcComm)}`],
                 ['Total anual', `USD ${fmt(total)}`],
               ].map(([k, v], i) => (
-                <div key={k} style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, color: 'var(--text-2)', padding: '10px 0', borderBottom: i < 3 ? '1px solid var(--border)' : 'none', borderTop: i === 3 ? '1px solid rgba(255,255,255,0.16)' : 'none', fontWeight: i === 3 ? 600 : 400, color: i === 3 ? 'var(--text)' : 'var(--text-2)' }}>
+                <div key={k} style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, padding: '10px 0', borderBottom: i < 3 ? '1px solid var(--border)' : 'none', borderTop: i === 3 ? '1px solid rgba(255,255,255,0.16)' : 'none', fontWeight: i === 3 ? 600 : 400, color: i === 3 ? 'var(--text)' : 'var(--text-2)' }}>
                   <span>{k}</span>
                   <span style={{ fontFamily: 'Geist Mono, monospace' }}>{v}</span>
                 </div>
