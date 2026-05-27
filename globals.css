@@ -1,0 +1,53 @@
+@import "tailwindcss";
+@import url('https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&family=Geist+Mono:wght@400;500&display=swap');
+
+/* ── Design Tokens ──────────────────────────────────────── */
+:root {
+  --bg:            #08080a;
+  --bg-2:          #0e0e12;
+  --surface:       #111114;
+  --surface-2:     #18181c;
+  --border:        rgba(255,255,255,0.08);
+  --border-strong: rgba(255,255,255,0.16);
+  --text:          #f2f2f4;
+  --text-2:        rgba(242,242,244,0.55);
+  --text-3:        rgba(242,242,244,0.30);
+  --byd-red:       #E60012;
+  --byd-red-2:     #ff4d5a;
+  --gold:          #D4AF37;
+  --success:       #34D399;
+  --warn:          #FBBF24;
+  --info:          #6ea8ff;
+  --danger:        #f87171;
+  --radius-xs:     6px;
+  --radius-sm:     10px;
+  --radius-md:     16px;
+  --radius-lg:     24px;
+  --radius-pill:   999px;
+}
+
+/* ── Reset ──────────────────────────────────────────────── */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: 'Sora', system-ui, -apple-system, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Preserve Tailwind utilities for other pages (browse, listing, etc.) */
+a { color: inherit; }
+button { font-family: inherit; cursor: pointer; }
+img { display: block; max-width: 100%; }
