@@ -203,9 +203,9 @@ export default function Home() {
     <div style={{ background: 'radial-gradient(1200px 600px at 80% -10%,rgba(230,0,18,.10),transparent 60%),radial-gradient(900px 500px at -10% 30%,rgba(255,180,120,.04),transparent 60%),var(--bg)', minHeight: '100vh' }}>
 
       {/* ── HERO ─────────────────────────────────────────────── */}
-      <div style={{ padding: '28px 40px 0', maxWidth: 1260, margin: '0 auto' }}>
+      <div style={{ padding: '28px 40px 0', maxWidth: 1260, margin: '0 auto', position: 'relative' }}>
         <div style={{
-          position: 'relative', borderRadius: 24, overflow: 'hidden',
+          position: 'relative', borderRadius: 24, overflow: 'visible',
           aspectRatio: '16/9.4', minHeight: 540,
           border: '1px solid rgba(255,255,255,0.08)',
           boxShadow: '0 60px 120px -40px rgba(0,0,0,0.7), inset 0 1px 0 rgba(255,255,255,0.06)',
@@ -217,11 +217,7 @@ export default function Home() {
           {/* Grid */}
           <div style={{ position: 'absolute', inset: 0, zIndex: 2, backgroundImage: 'linear-gradient(to right,rgba(255,255,255,.05) 1px,transparent 1px),linear-gradient(to bottom,rgba(255,255,255,.05) 1px,transparent 1px)', backgroundSize: '25% 33.33%', mixBlendMode: 'overlay', opacity: 0.6, pointerEvents: 'none' }} />
 
-          {/* Badge */}
-          <div style={{ position: 'absolute', top: 28, left: 32, zIndex: 3, display: 'inline-flex', alignItems: 'center', gap: 8, padding: '8px 14px', background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.12)', borderRadius: 999, backdropFilter: 'blur(10px)', fontSize: 12, fontWeight: 500 }}>
-            <span style={{ width: 7, height: 7, borderRadius: '50%', background: 'var(--byd-red-2)', boxShadow: '0 0 0 4px rgba(230,0,18,0.25)', flexShrink: 0 }} />
-            BYD Argentina · Oficial
-          </div>
+
 
           {/* Search icon */}
           <div style={{ position: 'absolute', top: 28, right: 32, zIndex: 3, width: 44, height: 44, borderRadius: '50%', display: 'grid', placeItems: 'center', background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.12)', backdropFilter: 'blur(10px)', cursor: 'pointer' }}>
@@ -248,120 +244,198 @@ export default function Home() {
             </div>
           </div>
 
-          {/* Search bar */}
-          <div
-            onClick={e => e.stopPropagation()}
-            style={{
-              position: 'absolute', left: '50%', bottom: 36, transform: 'translateX(-50%)', zIndex: 4,
-              width: 'min(900px, calc(100% - 80px))',
-              display: 'flex', alignItems: 'stretch',
-              background: 'rgba(16,16,20,0.82)', border: '1px solid rgba(255,255,255,0.18)',
-              backdropFilter: 'blur(24px) saturate(180%)', borderRadius: 999,
-              boxShadow: '0 24px 60px -20px rgba(0,0,0,0.65)', overflow: 'visible',
-            }}
-          >
-            {/* Fields */}
-            <div style={{ display: 'flex', flex: 1, minWidth: 0 }}>
-              {SEARCH_FIELDS.map((field, i) => (
+        </div>
+
+      {/* Search bar */}
+      <div
+        onClick={e => e.stopPropagation()}
+        style={{
+          position: 'absolute', left: '50%', bottom: 36, transform: 'translateX(-50%)', zIndex: 4,
+          width: 'min(900px, calc(100% - 80px))',
+          display: 'flex', alignItems: 'stretch',
+          background: 'rgba(16,16,20,0.82)', border: '1px solid rgba(255,255,255,0.18)',
+          backdropFilter: 'blur(24px) saturate(180%)', borderRadius: 999,
+          boxShadow: '0 24px 60px -20px rgba(0,0,0,0.65)', overflow: 'visible',
+        }}
+      >
+        {/* Fields */}
+        <div style={{ display: 'flex', flex: 1, minWidth: 0 }}>
+          {SEARCH_FIELDS.map((field, i) => (
+            <div
+              key={field.id}
+              onClick={e => toggleSF(field.id, e)}
+              style={{
+                flex: 1, minWidth: 0,
+                padding: '16px 18px',
+                display: 'flex', flexDirection: 'column', gap: 3,
+                borderRight: i < SEARCH_FIELDS.length - 1 ? '1px solid rgba(255,255,255,0.08)' : 'none',
+                cursor: 'pointer',
+                background: openSF === field.id ? 'rgba(255,255,255,0.06)' : 'transparent',
+                position: 'relative',
+                transition: 'background 0.15s',
+              }}
+            >
+              <span style={{ fontSize: 11, fontWeight: 600, color: openSF === field.id ? 'var(--byd-red-2)' : 'rgba(255,255,255,0.5)', letterSpacing: '0.07em', textTransform: 'uppercase', fontFamily: 'Geist Mono, monospace' }}>
+                {field.label}
+              </span>
+              <span style={{ fontSize: 13, color: 'var(--text)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', fontWeight: 500 }}>
+                {field.id === 'referente' ? (refCode || sfValues.referente) : sfValues[field.id]}
+              </span>
+              {/* Arrow */}
+              <svg style={{ position: 'absolute', right: 12, top: '50%', transform: `translateY(-50%) rotate(${openSF === field.id ? 180 : 0}deg)`, color: openSF === field.id ? 'var(--byd-red-2)' : 'rgba(255,255,255,0.22)', transition: 'transform 0.2s', pointerEvents: 'none' }} width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="m6 9 6 6 6-6"/></svg>
+
+              {/* Popover */}
+              {openSF === field.id && (
                 <div
-                  key={field.id}
-                  onClick={e => toggleSF(field.id, e)}
+                  onClick={e => e.stopPropagation()}
                   style={{
-                    flex: 1, minWidth: 0,
-                    padding: '16px 18px',
-                    display: 'flex', flexDirection: 'column', gap: 3,
-                    borderRight: i < SEARCH_FIELDS.length - 1 ? '1px solid rgba(255,255,255,0.08)' : 'none',
-                    cursor: 'pointer',
-                    background: openSF === field.id ? 'rgba(255,255,255,0.06)' : 'transparent',
-                    position: 'relative',
-                    transition: 'background 0.15s',
+                    position: 'absolute', top: 'calc(100% + 12px)', left: -1,
+                    minWidth: 220, maxWidth: 320,
+                    background: 'rgba(14,14,18,0.98)', backdropFilter: 'blur(28px) saturate(180%)',
+                    border: '1px solid rgba(255,255,255,0.16)', borderRadius: 14,
+                    padding: 6, zIndex: 500,
+                    boxShadow: '0 28px 64px -20px rgba(0,0,0,0.85)',
                   }}
                 >
-                  <span style={{ fontSize: 11, fontWeight: 600, color: openSF === field.id ? 'var(--byd-red-2)' : 'rgba(255,255,255,0.5)', letterSpacing: '0.07em', textTransform: 'uppercase', fontFamily: 'Geist Mono, monospace' }}>
-                    {field.label}
-                  </span>
-                  <span style={{ fontSize: 13, color: 'var(--text)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', fontWeight: 500 }}>
-                    {field.id === 'referente' ? (refCode || sfValues.referente) : sfValues[field.id]}
-                  </span>
-                  {/* Arrow */}
-                  <svg style={{ position: 'absolute', right: 12, top: '50%', transform: `translateY(-50%) rotate(${openSF === field.id ? 180 : 0}deg)`, color: openSF === field.id ? 'var(--byd-red-2)' : 'rgba(255,255,255,0.22)', transition: 'transform 0.2s', pointerEvents: 'none' }} width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="m6 9 6 6 6-6"/></svg>
-
-                  {/* Popover */}
-                  {openSF === field.id && (
-                    <div
-                      onClick={e => e.stopPropagation()}
-                      style={{
-                        position: 'absolute', top: 'calc(100% + 12px)', left: -1,
-                        minWidth: 220, maxWidth: 320,
-                        background: 'rgba(14,14,18,0.98)', backdropFilter: 'blur(28px) saturate(180%)',
-                        border: '1px solid rgba(255,255,255,0.16)', borderRadius: 14,
-                        padding: 6, zIndex: 500,
-                        boxShadow: '0 28px 64px -20px rgba(0,0,0,0.85)',
-                      }}
-                    >
-                      {field.id === 'referente' ? (
-                        <>
-                          <div style={{ padding: '5px 5px 8px', borderBottom: '1px solid rgba(255,255,255,0.08)', marginBottom: 4 }}>
-                            <input
-                              type="text"
-                              placeholder="BYD-ABC123"
-                              value={refCode}
-                              onChange={e => { setRefCode(e.target.value.toUpperCase()); setSFValues(p => ({ ...p, referente: e.target.value.toUpperCase() || '¿Te recomendaron?' })) }}
-                              onClick={e => e.stopPropagation()}
-                              style={{ width: '100%', padding: '8px 10px', background: 'rgba(0,0,0,0.4)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 8, fontFamily: 'Geist Mono, monospace', fontSize: 12, color: 'var(--text)', textTransform: 'uppercase', letterSpacing: '0.06em', outline: 'none' }}
-                            />
-                            <p style={{ fontSize: 11, color: 'rgba(255,255,255,0.3)', marginTop: 5, lineHeight: 1.5 }}>Ingresá el código del dueño BYD.</p>
-                          </div>
-                          {['Sin código por ahora', 'Asignarme un referente cercano'].map(opt => (
-                            <button key={opt} onClick={e => pickSF(field.id, opt, e)} style={{ display: 'flex', alignItems: 'center', width: '100%', textAlign: 'left', padding: '9px 11px', background: 'transparent', border: 'none', color: sfValues[field.id] === opt ? 'var(--byd-red-2)' : 'rgba(255,255,255,0.5)', fontSize: 13, fontFamily: 'Sora, sans-serif', borderRadius: 6, cursor: 'pointer' }}>
-                              {opt}
-                            </button>
-                          ))}
-                        </>
+                  {field.id === 'referente' ? (
+                    <>
+                      <div style={{ padding: '5px 5px 8px', borderBottom: '1px solid rgba(255,255,255,0.08)', marginBottom: 4 }}>
+                        <input
+                          type="text"
+                          placeholder="BYD-ABC123"
+                          value={refCode}
+                          onChange={e => { setRefCode(e.target.value.toUpperCase()); setSFValues(p => ({ ...p, referente: e.target.value.toUpperCase() || '¿Te recomendaron?' })) }}
+                          onClick={e => e.stopPropagation()}
+                          style={{ width: '100%', padding: '8px 10px', background: 'rgba(0,0,0,0.4)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 8, fontFamily: 'Geist Mono, monospace', fontSize: 12, color: 'var(--text)', textTransform: 'uppercase', letterSpacing: '0.06em', outline: 'none' }}
+                        />
+                        <p style={{ fontSize: 11, color: 'rgba(255,255,255,0.3)', marginTop: 5, lineHeight: 1.5 }}>Ingresá el código del dueño BYD.</p>
+                      </div>
+                      {['Sin código por ahora', 'Asignarme un referente cercano'].map(opt => (
+                        <button key={opt} onClick={e => pickSF(field.id, opt, e)} style={{ display: 'flex', alignItems: 'center', width: '100%', textAlign: 'left', padding: '9px 11px', background: 'transparent', border: 'none', color: sfValues[field.id] === opt ? 'var(--byd-red-2)' : 'rgba(255,255,255,0.5)', fontSize: 13, fontFamily: 'Sora, sans-serif', borderRadius: 6, cursor: 'pointer' }}>
+                          {opt}
+                        </button>
+                      ))}
+                    </>
+                  ) : (
+                    <>
+                      <div style={{ fontSize: 10, fontFamily: 'Geist Mono, monospace', color: 'rgba(255,255,255,0.28)', textTransform: 'uppercase', letterSpacing: '0.10em', padding: '7px 11px 3px' }}>
+                        {field.label}
+                      </div>
+                      {/* Model field: show thumbnails */}
+                      {field.id === 'modelo' ? (
+                        SEARCH_OPTIONS.modelo.map((opt, idx) => (
+                          <button key={opt} onClick={e => pickSF(field.id, opt, e)} style={{ display: 'flex', alignItems: 'center', gap: 9, width: '100%', textAlign: 'left', padding: '8px 10px', background: 'transparent', border: 'none', color: sfValues[field.id] === opt ? 'var(--byd-red-2)' : 'rgba(255,255,255,0.5)', fontSize: 13, fontFamily: 'Sora, sans-serif', borderRadius: 6, cursor: 'pointer' }}>
+                            <div style={{ width: 44, height: 30, borderRadius: 5, overflow: 'hidden', flexShrink: 0, background: idx === 0 ? 'var(--byd-red)' : 'rgba(255,255,255,0.06)', display: 'grid', placeItems: 'center' }}>
+                              {idx === 0
+                                ? <span style={{ fontWeight: 800, fontSize: 9, color: '#fff' }}>BYD</span>
+                                : <img src={[IMG_DOLPHIN,IMG_YUAN,IMG_SONG,IMG_SHARK][idx-1]} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                              }
+                            </div>
+                            {opt}
+                          </button>
+                        ))
                       ) : (
-                        <>
-                          <div style={{ fontSize: 10, fontFamily: 'Geist Mono, monospace', color: 'rgba(255,255,255,0.28)', textTransform: 'uppercase', letterSpacing: '0.10em', padding: '7px 11px 3px' }}>
-                            {field.label}
-                          </div>
-                          {/* Model field: show thumbnails */}
-                          {field.id === 'modelo' ? (
-                            SEARCH_OPTIONS.modelo.map((opt, idx) => (
-                              <button key={opt} onClick={e => pickSF(field.id, opt, e)} style={{ display: 'flex', alignItems: 'center', gap: 9, width: '100%', textAlign: 'left', padding: '8px 10px', background: 'transparent', border: 'none', color: sfValues[field.id] === opt ? 'var(--byd-red-2)' : 'rgba(255,255,255,0.5)', fontSize: 13, fontFamily: 'Sora, sans-serif', borderRadius: 6, cursor: 'pointer' }}>
-                                <div style={{ width: 44, height: 30, borderRadius: 5, overflow: 'hidden', flexShrink: 0, background: idx === 0 ? 'var(--byd-red)' : 'rgba(255,255,255,0.06)', display: 'grid', placeItems: 'center' }}>
-                                  {idx === 0
-                                    ? <span style={{ fontWeight: 800, fontSize: 9, color: '#fff' }}>BYD</span>
-                                    : <img src={[IMG_DOLPHIN,IMG_YUAN,IMG_SONG,IMG_SHARK][idx-1]} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                                  }
-                                </div>
-                                {opt}
-                              </button>
-                            ))
-                          ) : (
-                            SEARCH_OPTIONS[field.id].map(opt => (
-                              <button key={opt} onClick={e => pickSF(field.id, opt, e)} style={{ display: 'flex', alignItems: 'center', width: '100%', textAlign: 'left', padding: '9px 11px', background: 'transparent', border: 'none', color: sfValues[field.id] === opt ? 'var(--byd-red-2)' : 'rgba(255,255,255,0.5)', fontSize: 13, fontFamily: 'Sora, sans-serif', borderRadius: 6, cursor: 'pointer' }}>
-                                {opt}
-                              </button>
-                            ))
-                          )}
-                        </>
+                        SEARCH_OPTIONS[field.id].map(opt => (
+                          <button key={opt} onClick={e => pickSF(field.id, opt, e)} style={{ display: 'flex', alignItems: 'center', width: '100%', textAlign: 'left', padding: '9px 11px', background: 'transparent', border: 'none', color: sfValues[field.id] === opt ? 'var(--byd-red-2)' : 'rgba(255,255,255,0.5)', fontSize: 13, fontFamily: 'Sora, sans-serif', borderRadius: 6, cursor: 'pointer' }}>
+                            {opt}
+                          </button>
+                        ))
                       )}
-                    </div>
+                    </>
                   )}
                 </div>
-              ))}
+              )}
             </div>
+          ))}
+        </div>
 
-            {/* Mic button */}
-            <div style={{ width: 60, display: 'grid', placeItems: 'center', background: 'var(--byd-red)', color: '#fff', cursor: 'pointer', borderRadius: '0 999px 999px 0', flexShrink: 0 }}>
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <rect x="9" y="2" width="6" height="12" rx="3"/>
-                <path d="M5 10v2a7 7 0 0 0 14 0v-2"/>
-                <path d="M12 19v3"/>
-                <path d="M8 22h8"/>
+        {/* Mic button */}
+        <div style={{ width: 60, display: 'grid', placeItems: 'center', background: 'var(--byd-red)', color: '#fff', cursor: 'pointer', borderRadius: '0 999px 999px 0', flexShrink: 0 }}>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <rect x="9" y="2" width="6" height="12" rx="3"/>
+            <path d="M5 10v2a7 7 0 0 0 14 0v-2"/>
+            <path d="M12 19v3"/>
+            <path d="M8 22h8"/>
+          </svg>
+        </div>
+      </div>
+        </div>
+  
+      </div>
+
+      {/* ── TRUST STRIP ─────────────────────────────────────── */}
+      <div style={{
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        gap: 0, borderBottom: '1px solid var(--border)',
+        background: 'rgba(255,255,255,0.02)',
+        overflow: 'hidden',
+      }}>
+        {[
+          {
+            icon: (
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                <path d="m9 12 2 2 4-4"/>
               </svg>
+            ),
+            color: '#34D399',
+            bg: 'rgba(52,211,153,0.08)',
+            border: 'rgba(52,211,153,0.20)',
+            label: 'Identidad verificada por RENAPER',
+            sub: 'Todos los vendedores pasan por el sistema de identidad digital del Estado argentino',
+          },
+          {
+            icon: (
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
+                <path d="M3.85 8.62a4 4 0 0 1 4.78-4.77 4 4 0 0 1 6.74 0 4 4 0 0 1 4.78 4.78 4 4 0 0 1 0 6.74 4 4 0 0 1-4.77 4.78 4 4 0 0 1-6.75 0 4 4 0 0 1-4.78-4.77 4 4 0 0 1 0-6.76Z"/>
+                <path d="m9 12 2 2 4-4"/>
+              </svg>
+            ),
+            color: '#6ea8ff',
+            bg: 'rgba(110,168,255,0.08)',
+            border: 'rgba(110,168,255,0.20)',
+            label: 'Seguro obligatorio con +123Seguro',
+            sub: 'Activación del seguro en 2 minutos al momento de cerrar la operación',
+          },
+          {
+            icon: (
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
+                <rect x="2" y="7" width="16" height="10" rx="2"/>
+                <path d="M22 11v2"/>
+                <path d="M6 11v2"/>
+                <path d="M10 11v2"/>
+                <path d="M14 11v2"/>
+              </svg>
+            ),
+            color: '#D4AF37',
+            bg: 'rgba(212,175,55,0.08)',
+            border: 'rgba(212,175,55,0.20)',
+            label: 'Batería certificada por mecánico BYD',
+            sub: 'Informe de State of Health (SoH) emitido por inspector autorizado BYD Argentina',
+          },
+        ].map((item, i) => (
+          <div key={i} style={{
+            flex: 1, display: 'flex', alignItems: 'flex-start', gap: 14,
+            padding: '22px 28px',
+            borderRight: i < 2 ? '1px solid var(--border)' : 'none',
+          }}>
+            <div style={{
+              width: 40, height: 40, borderRadius: 10, flexShrink: 0,
+              background: item.bg, border: `1px solid ${item.border}`,
+              display: 'grid', placeItems: 'center', color: item.color,
+            }}>
+              {item.icon}
+            </div>
+            <div>
+              <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--text)', marginBottom: 4, letterSpacing: '-0.01em' }}>
+                {item.label}
+              </div>
+              <div style={{ fontSize: 12, color: 'var(--text-3)', lineHeight: 1.5 }}>
+                {item.sub}
+              </div>
             </div>
           </div>
-        </div>
+        ))}
       </div>
 
       {/* ── STATS ────────────────────────────────────────────── */}
@@ -644,6 +718,150 @@ export default function Home() {
               )}
             </div>
           </div>
+        </div>
+      </div>
+
+
+      {/* ── DIFFERENTIATORS ──────────────────────────────────── */}
+      <div style={{ ...S.page, ...S.section }}>
+        <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', marginBottom: 36 }}>
+          <div>
+            <div style={S.eyebrow}>Tecnología de confianza <span style={{ color: 'var(--text-3)' }}>/ 03</span></div>
+            <h2 style={{ fontSize: 'clamp(34px,3.4vw,52px)', fontWeight: 600, letterSpacing: '-0.03em', lineHeight: 1.04, margin: 0 }}>
+              Lo que ningún otro marketplace<br/>de autos tiene en Argentina.
+            </h2>
+          </div>
+          <p style={{ color: 'var(--text-2)', fontSize: 16, maxWidth: 400 }}>
+            Integramos tres capas de verificación que protegen al comprador y al vendedor antes, durante y después de cada operación.
+          </p>
+        </div>
+
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 16 }}>
+
+          {/* RENAPER */}
+          <div style={{
+            background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 20,
+            padding: 32, display: 'flex', flexDirection: 'column', gap: 20, position: 'relative', overflow: 'hidden',
+          }}>
+            <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 2, background: 'linear-gradient(90deg, #34D399, transparent)' }} />
+            <div style={{
+              width: 52, height: 52, borderRadius: 14,
+              background: 'rgba(52,211,153,0.10)', border: '1px solid rgba(52,211,153,0.25)',
+              display: 'grid', placeItems: 'center', color: '#34D399',
+            }}>
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                <path d="m9 12 2 2 4-4"/>
+              </svg>
+            </div>
+            <div>
+              <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '3px 10px', background: 'rgba(52,211,153,0.10)', border: '1px solid rgba(52,211,153,0.20)', borderRadius: 999, fontSize: 10, fontFamily: 'Geist Mono, monospace', color: '#34D399', letterSpacing: '0.08em', textTransform: 'uppercase' as const, marginBottom: 12 }}>
+                RENAPER · SID
+              </div>
+              <h3 style={{ fontSize: 22, fontWeight: 600, letterSpacing: '-0.02em', marginBottom: 10, lineHeight: 1.2 }}>
+                Verificación de identidad del Estado
+              </h3>
+              <p style={{ fontSize: 14, color: 'var(--text-2)', lineHeight: 1.6 }}>
+                Cada vendedor pasa por el Sistema de Identidad Digital de RENAPER. Documento + biometría facial en tiempo real. Si la identidad no coincide, la publicación no se activa.
+              </p>
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 10, paddingTop: 16, borderTop: '1px solid var(--border)' }}>
+              {['DNI + liveness check biométrico', 'Consulta en tiempo real a base RENAPER', 'Badge verificado visible en cada anuncio'].map(f => (
+                <div key={f} style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: 13, color: 'var(--text-2)' }}>
+                  <div style={{ width: 18, height: 18, borderRadius: '50%', background: 'rgba(52,211,153,0.15)', border: '1px solid rgba(52,211,153,0.30)', display: 'grid', placeItems: 'center', flexShrink: 0 }}>
+                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#34D399" strokeWidth="3" strokeLinecap="round"><path d="M20 6 9 17l-5-5"/></svg>
+                  </div>
+                  {f}
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* 123Seguro */}
+          <div style={{
+            background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 20,
+            padding: 32, display: 'flex', flexDirection: 'column', gap: 20, position: 'relative', overflow: 'hidden',
+          }}>
+            <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 2, background: 'linear-gradient(90deg, #6ea8ff, transparent)' }} />
+            <div style={{
+              width: 52, height: 52, borderRadius: 14,
+              background: 'rgba(110,168,255,0.10)', border: '1px solid rgba(110,168,255,0.25)',
+              display: 'grid', placeItems: 'center', color: '#6ea8ff',
+            }}>
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
+                <path d="M3.85 8.62a4 4 0 0 1 4.78-4.77 4 4 0 0 1 6.74 0 4 4 0 0 1 4.78 4.78 4 4 0 0 1 0 6.74 4 4 0 0 1-4.77 4.78 4 4 0 0 1-6.75 0 4 4 0 0 1-4.78-4.77 4 4 0 0 1 0-6.76Z"/>
+                <path d="m9 12 2 2 4-4"/>
+              </svg>
+            </div>
+            <div>
+              <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '3px 10px', background: 'rgba(110,168,255,0.10)', border: '1px solid rgba(110,168,255,0.20)', borderRadius: 999, fontSize: 10, fontFamily: 'Geist Mono, monospace', color: '#6ea8ff', letterSpacing: '0.08em', textTransform: 'uppercase' as const, marginBottom: 12 }}>
+                +123Seguro · API
+              </div>
+              <h3 style={{ fontSize: 22, fontWeight: 600, letterSpacing: '-0.02em', marginBottom: 10, lineHeight: 1.2 }}>
+                Seguro obligatorio en 2 minutos
+              </h3>
+              <p style={{ fontSize: 14, color: 'var(--text-2)', lineHeight: 1.6 }}>
+                Al cerrar la operación, el comprador activa el seguro obligatorio sin salir de la plataforma. Cotización instantánea, pago online, póliza digital en el acto. Sin papelería, sin demoras.
+              </p>
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 10, paddingTop: 16, borderTop: '1px solid var(--border)' }}>
+              {['Cotización automática por modelo y zona', 'Póliza emitida al instante, sin trámites', 'Comisión 10-20% por póliza para la plataforma'].map(f => (
+                <div key={f} style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: 13, color: 'var(--text-2)' }}>
+                  <div style={{ width: 18, height: 18, borderRadius: '50%', background: 'rgba(110,168,255,0.15)', border: '1px solid rgba(110,168,255,0.30)', display: 'grid', placeItems: 'center', flexShrink: 0 }}>
+                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#6ea8ff" strokeWidth="3" strokeLinecap="round"><path d="M20 6 9 17l-5-5"/></svg>
+                  </div>
+                  {f}
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Battery SoH */}
+          <div style={{
+            background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 20,
+            padding: 32, display: 'flex', flexDirection: 'column', gap: 20, position: 'relative', overflow: 'hidden',
+          }}>
+            <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 2, background: 'linear-gradient(90deg, #D4AF37, transparent)' }} />
+            <div style={{
+              width: 52, height: 52, borderRadius: 14,
+              background: 'rgba(212,175,55,0.10)', border: '1px solid rgba(212,175,55,0.25)',
+              display: 'grid', placeItems: 'center', color: '#D4AF37',
+            }}>
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
+                <rect x="2" y="7" width="16" height="10" rx="2"/>
+                <path d="M22 11v2"/>
+                <path d="M6 11v2"/>
+                <path d="M10 11v2"/>
+                <path d="M14 11v2"/>
+              </svg>
+            </div>
+            <div>
+              <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '3px 10px', background: 'rgba(212,175,55,0.10)', border: '1px solid rgba(212,175,55,0.20)', borderRadius: 999, fontSize: 10, fontFamily: 'Geist Mono, monospace', color: '#D4AF37', letterSpacing: '0.08em', textTransform: 'uppercase' as const, marginBottom: 12 }}>
+                Battery SoH · OBD
+              </div>
+              <h3 style={{ fontSize: 22, fontWeight: 600, letterSpacing: '-0.02em', marginBottom: 10, lineHeight: 1.2 }}>
+                Estado real de batería certificado
+              </h3>
+              <p style={{ fontSize: 14, color: 'var(--text-2)', lineHeight: 1.6 }}>
+                Un mecánico autorizado BYD conecta un lector OBD y emite el informe State of Health de la batería. Sabés exactamente cuánta capacidad real tiene antes de comprar.
+              </p>
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 10, paddingTop: 16, borderTop: '1px solid var(--border)' }}>
+              {[
+                'Grades: Excelente ≥90% · Buena ≥80% · Regular ≥70%',
+                'Informe con número de serie y fecha de emisión',
+                'Badge visible en la tarjeta del anuncio',
+              ].map(f => (
+                <div key={f} style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: 13, color: 'var(--text-2)' }}>
+                  <div style={{ width: 18, height: 18, borderRadius: '50%', background: 'rgba(212,175,55,0.15)', border: '1px solid rgba(212,175,55,0.30)', display: 'grid', placeItems: 'center', flexShrink: 0 }}>
+                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#D4AF37" strokeWidth="3" strokeLinecap="round"><path d="M20 6 9 17l-5-5"/></svg>
+                  </div>
+                  {f}
+                </div>
+              ))}
+            </div>
+          </div>
+
         </div>
       </div>
 
