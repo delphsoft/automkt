@@ -1,6 +1,5 @@
 'use client'
-import { useState, useRef, useEffect, useCallback } from 'react'
-import { createPortal } from 'react-dom'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 
 // ─── Embedded images (base64) ────────────────────────────────────────────────
@@ -119,7 +118,6 @@ const S = {
 // ─── Component ───────────────────────────────────────────────────────────────
 export default function Home() {
   const [openSF, setOpenSF] = useState<SFId | null>(null)
-  const [popoverPos, setPopoverPos] = useState<{top: number, left: number} | null>(null)
   const [sfValues, setSFValues] = useState<Record<SFId, string>>({
     modelo: 'Todos los BYD',
     tipo: 'EV · PHEV',
@@ -151,28 +149,20 @@ export default function Home() {
   const total = sales * calcComm
 
   useEffect(() => {
-    const close = () => { setOpenSF(null); setPopoverPos(null) }
+    const close = () => setOpenSF(null)
     document.addEventListener('click', close)
     return () => document.removeEventListener('click', close)
   }, [])
 
   const toggleSF = (id: SFId, e: React.MouseEvent) => {
     e.stopPropagation()
-    if (openSF === id) {
-      setOpenSF(null)
-      setPopoverPos(null)
-    } else {
-      const rect = (e.currentTarget as HTMLElement).getBoundingClientRect()
-      setPopoverPos({ top: rect.bottom + 12, left: rect.left })
-      setOpenSF(id)
-    }
+    setOpenSF(prev => prev === id ? null : id)
   }
 
   const pickSF = (id: SFId, val: string, e: React.MouseEvent) => {
     e.stopPropagation()
     setSFValues(p => ({ ...p, [id]: val }))
     setOpenSF(null)
-    setPopoverPos(null)
   }
 
   const runAI = async () => {
@@ -222,7 +212,7 @@ export default function Home() {
           overflow: 'hidden',
         }}>
           {/* Background image */}
-          <img src={IMG_HERO} alt="" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', zIndex: 1 }} />
+          <img src={IMG_HERO} alt="" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: '50% 40%', zIndex: 1 }} />
           {/* Overlay */}
           <div style={{ position: 'absolute', inset: 0, zIndex: 2, background: 'linear-gradient(180deg,rgba(8,8,10,.2) 0%,rgba(8,8,10,.08) 35%,rgba(8,8,10,.72) 82%,rgba(8,8,10,.9) 100%)' }} />
           {/* Grid */}
@@ -257,7 +247,6 @@ export default function Home() {
       {/* ── SEARCH BAR ── outside hero, no stacking context issues ── */}
       <div style={{ maxWidth: 1260, margin: '-36px auto 0', padding: '0 40px', position: 'relative', zIndex: 20 }}>
         <div
-          onClick={e => e.stopPropagation()}
           style={{
             display: 'flex', alignItems: 'stretch',
             background: 'rgba(16,16,20,0.95)',
@@ -373,81 +362,6 @@ export default function Home() {
         </div>
       </div>
 
-
-      {/* ── TRUST STRIP ─────────────────────────────────────── */}
-      <div style={{
-        display: 'flex', alignItems: 'center', justifyContent: 'center',
-        gap: 0, borderBottom: '1px solid var(--border)',
-        background: 'rgba(255,255,255,0.02)',
-        overflow: 'hidden',
-      }}>
-        {[
-          {
-            icon: (
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
-                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
-                <path d="m9 12 2 2 4-4"/>
-              </svg>
-            ),
-            color: '#34D399',
-            bg: 'rgba(52,211,153,0.08)',
-            border: 'rgba(52,211,153,0.20)',
-            label: 'Identidad verificada por RENAPER',
-            sub: 'Todos los vendedores pasan por el sistema de identidad digital del Estado argentino',
-          },
-          {
-            icon: (
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
-                <path d="M3.85 8.62a4 4 0 0 1 4.78-4.77 4 4 0 0 1 6.74 0 4 4 0 0 1 4.78 4.78 4 4 0 0 1 0 6.74 4 4 0 0 1-4.77 4.78 4 4 0 0 1-6.75 0 4 4 0 0 1-4.78-4.77 4 4 0 0 1 0-6.76Z"/>
-                <path d="m9 12 2 2 4-4"/>
-              </svg>
-            ),
-            color: '#6ea8ff',
-            bg: 'rgba(110,168,255,0.08)',
-            border: 'rgba(110,168,255,0.20)',
-            label: 'Seguro obligatorio con +123Seguro',
-            sub: 'Activación del seguro en 2 minutos al momento de cerrar la operación',
-          },
-          {
-            icon: (
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
-                <rect x="2" y="7" width="16" height="10" rx="2"/>
-                <path d="M22 11v2"/>
-                <path d="M6 11v2"/>
-                <path d="M10 11v2"/>
-                <path d="M14 11v2"/>
-              </svg>
-            ),
-            color: '#D4AF37',
-            bg: 'rgba(212,175,55,0.08)',
-            border: 'rgba(212,175,55,0.20)',
-            label: 'Batería certificada por mecánico BYD',
-            sub: 'Informe de State of Health (SoH) emitido por inspector autorizado BYD Argentina',
-          },
-        ].map((item, i) => (
-          <div key={i} style={{
-            flex: 1, display: 'flex', alignItems: 'flex-start', gap: 14,
-            padding: '22px 28px',
-            borderRight: i < 2 ? '1px solid var(--border)' : 'none',
-          }}>
-            <div style={{
-              width: 40, height: 40, borderRadius: 10, flexShrink: 0,
-              background: item.bg, border: `1px solid ${item.border}`,
-              display: 'grid', placeItems: 'center', color: item.color,
-            }}>
-              {item.icon}
-            </div>
-            <div>
-              <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--text)', marginBottom: 4, letterSpacing: '-0.01em' }}>
-                {item.label}
-              </div>
-              <div style={{ fontSize: 12, color: 'var(--text-3)', lineHeight: 1.5 }}>
-                {item.sub}
-              </div>
-            </div>
-          </div>
-        ))}
-      </div>
 
       {/* ── STATS ────────────────────────────────────────────── */}
       <div style={S.page}>
@@ -1078,9 +992,31 @@ export default function Home() {
             </div>
           ))}
         </div>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 60, paddingTop: 30, borderTop: '1px solid var(--border)', color: 'var(--text-3)', fontSize: 12, fontFamily: 'Geist Mono, monospace' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 60, paddingTop: 30, borderTop: '1px solid rgba(255,255,255,0.08)', color: 'var(--text-3)', fontSize: 12, fontFamily: 'Geist Mono, monospace' }}>
           <span>© 2026 BYD ARGENTINA S.A.U.</span>
-          <span>BUILD YOUR DREAMS · TÉRMINOS · PRIVACIDAD</span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+            <span>BUILD YOUR DREAMS · TÉRMINOS · PRIVACIDAD</span>
+            <div style={{ display: 'flex', gap: 10, marginLeft: 8 }}>
+              {/* Instagram */}
+              <a href="https://instagram.com/bydargentina" target="_blank" rel="noopener" style={{ width: 32, height: 32, borderRadius: 8, background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.08)', display: 'grid', placeItems: 'center', color: 'rgba(255,255,255,0.4)', transition: 'all 0.15s', textDecoration: 'none' }}
+                onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.12)'; (e.currentTarget as HTMLElement).style.color = '#f2f2f4' }}
+                onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.06)'; (e.currentTarget as HTMLElement).style.color = 'rgba(255,255,255,0.4)' }}>
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="20" height="20" x="2" y="2" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" x2="17.51" y1="6.5" y2="6.5"/></svg>
+              </a>
+              {/* Facebook */}
+              <a href="https://facebook.com/bydargentina" target="_blank" rel="noopener" style={{ width: 32, height: 32, borderRadius: 8, background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.08)', display: 'grid', placeItems: 'center', color: 'rgba(255,255,255,0.4)', transition: 'all 0.15s', textDecoration: 'none' }}
+                onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.12)'; (e.currentTarget as HTMLElement).style.color = '#f2f2f4' }}
+                onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.06)'; (e.currentTarget as HTMLElement).style.color = 'rgba(255,255,255,0.4)' }}>
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg>
+              </a>
+              {/* X / Twitter */}
+              <a href="https://twitter.com/bydargentina" target="_blank" rel="noopener" style={{ width: 32, height: 32, borderRadius: 8, background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.08)', display: 'grid', placeItems: 'center', color: 'rgba(255,255,255,0.4)', transition: 'all 0.15s', textDecoration: 'none' }}
+                onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.12)'; (e.currentTarget as HTMLElement).style.color = '#f2f2f4' }}
+                onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.06)'; (e.currentTarget as HTMLElement).style.color = 'rgba(255,255,255,0.4)' }}>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.744l7.737-8.835L1.254 2.25H8.08l4.259 5.629L18.244 2.25Zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+              </a>
+            </div>
+          </div>
         </div>
       </footer>
 
