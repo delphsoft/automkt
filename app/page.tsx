@@ -205,8 +205,8 @@ export default function Home() {
       {/* ── HERO ─────────────────────────────────────────────── */}
       <div style={{ padding: '28px 40px 0', maxWidth: 1260, margin: '0 auto', position: 'relative' }}>
         <div style={{
-          position: 'relative', borderRadius: 24, overflow: 'visible',
-          aspectRatio: '16/9.4', minHeight: 540,
+          position: 'relative', borderRadius: 28, overflow: 'clip',
+          aspectRatio: '16/8', minHeight: 640,
           border: '1px solid rgba(255,255,255,0.08)',
           boxShadow: '0 60px 120px -40px rgba(0,0,0,0.7), inset 0 1px 0 rgba(255,255,255,0.06)',
         }}>
@@ -219,10 +219,7 @@ export default function Home() {
 
 
 
-          {/* Search icon */}
-          <div style={{ position: 'absolute', top: 28, right: 32, zIndex: 3, width: 44, height: 44, borderRadius: '50%', display: 'grid', placeItems: 'center', background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.12)', backdropFilter: 'blur(10px)', cursor: 'pointer' }}>
-            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
-          </div>
+
 
           {/* Content */}
           <div style={{ position: 'absolute', left: 0, right: 0, top: '16%', textAlign: 'center', padding: '0 40px', zIndex: 3 }}>
@@ -268,6 +265,7 @@ export default function Home() {
                 flex: 1, minWidth: 0,
                 padding: '16px 18px',
                 display: 'flex', flexDirection: 'column', gap: 3,
+                position: 'relative',
                 borderRight: i < SEARCH_FIELDS.length - 1 ? '1px solid rgba(255,255,255,0.08)' : 'none',
                 cursor: 'pointer',
                 background: openSF === field.id ? 'rgba(255,255,255,0.06)' : 'transparent',
@@ -860,6 +858,141 @@ export default function Home() {
             </div>
           </div>
 
+        </div>
+      </div>
+
+      {/* ── QUIERO SER REFERENTE ────────────────────────────── */}
+      <div style={{ ...S.page, ...S.section }} id="ser-referente">
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 0, border: '1px solid var(--border)', borderRadius: 24, overflow: 'hidden', background: 'var(--surface)' }}>
+
+          {/* Left: value prop */}
+          <div style={{
+            padding: '60px 56px',
+            background: 'radial-gradient(ellipse 120% 80% at 0% 50%, rgba(230,0,18,0.12), transparent 60%), radial-gradient(ellipse 80% 60% at 100% 100%, rgba(110,168,255,0.06), transparent 60%)',
+            borderRight: '1px solid var(--border)',
+            display: 'flex', flexDirection: 'column', gap: 32,
+          }}>
+            <div>
+              <div style={{ fontSize: 11, fontFamily: 'Geist Mono, monospace', color: 'var(--byd-red-2)', letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: 16, display: 'flex', alignItems: 'center', gap: 8 }}>
+                <span style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--byd-red-2)', display: 'inline-block' }}/>
+                Programa de referentes
+              </div>
+              <h2 style={{ fontSize: 'clamp(32px,3vw,48px)', fontWeight: 700, letterSpacing: '-0.035em', lineHeight: 1.05, margin: '0 0 16px' }}>
+                Tu BYD trabaja<br/>para vos<br/><em style={{ fontStyle: 'normal', background: 'linear-gradient(180deg,#fff 0%,#ff8a98 130%)', WebkitBackgroundClip: 'text', backgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>cuando dormís.</em>
+              </h2>
+              <p style={{ fontSize: 16, color: 'var(--text-2)', lineHeight: 1.65, maxWidth: 400 }}>
+                Cada vez que alguien compra un BYD recomendado por vos, cobrás comisión en dólares. Sin metas. Sin cuotas. Sin presión de venta.
+              </p>
+            </div>
+
+            {/* Live stats mini-card */}
+            <div style={{ background: 'rgba(0,0,0,0.3)', border: '1px solid var(--border)', borderRadius: 16, padding: '24px 28px' }}>
+              <div style={{ fontSize: 11, fontFamily: 'Geist Mono, monospace', color: 'var(--text-3)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 8 }}>Comisiones este mes · promedio</div>
+              <div style={{ fontSize: 48, fontWeight: 700, letterSpacing: '-0.035em', lineHeight: 1, marginBottom: 6 }}>
+                <span style={{ fontSize: 18, color: 'var(--text-2)', marginRight: 4, verticalAlign: 'top', lineHeight: 1.5 }}>USD</span>
+                2.150
+              </div>
+              <div style={{ fontSize: 13, color: 'var(--text-3)', fontFamily: 'Geist Mono, monospace', marginBottom: 16 }}>7 referidos activos · 3 ventas cerradas</div>
+              <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+                {['↑ +47% vs mes anterior', 'Tier Gold', 'Ranking #14 nacional'].map(tag => (
+                  <span key={tag} style={{ padding: '4px 10px', background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.10)', borderRadius: 999, fontSize: 11, color: 'var(--text-2)', fontFamily: 'Geist Mono, monospace' }}>{tag}</span>
+                ))}
+              </div>
+            </div>
+
+            {/* Tiers */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+              {[
+                { tier: 'Bronce', req: '1-2 ventas', pct: '1%', color: '#cd7f32' },
+                { tier: 'Plata', req: '3-5 ventas', pct: '1.5%', color: '#aaaaaa' },
+                { tier: 'Oro', req: '6+ ventas', pct: '2%', color: '#D4AF37' },
+              ].map(t => (
+                <div key={t.tier} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '10px 14px', background: 'rgba(0,0,0,0.2)', borderRadius: 10, border: '1px solid rgba(255,255,255,0.06)' }}>
+                  <div style={{ width: 8, height: 8, borderRadius: '50%', background: t.color, flexShrink: 0, boxShadow: `0 0 6px ${t.color}` }}/>
+                  <span style={{ fontSize: 13, fontWeight: 600 }}>{t.tier}</span>
+                  <span style={{ fontSize: 12, color: 'var(--text-3)' }}>{t.req}</span>
+                  <span style={{ marginLeft: 'auto', fontSize: 13, fontFamily: 'Geist Mono, monospace', color: t.color, fontWeight: 600 }}>{t.pct}</span>
+                </div>
+              ))}
+            </div>
+
+            {/* Quote */}
+            <div style={{ borderLeft: '2px solid var(--byd-red)', paddingLeft: 18 }}>
+              <p style={{ fontSize: 14, color: 'var(--text-2)', lineHeight: 1.65, fontStyle: 'italic', marginBottom: 8 }}>
+                "Recomiendo mi Song Pro porque me encanta. Que encima me paguen por hacerlo es absurdo. Llevo 5 ventas en 3 meses."
+              </p>
+              <div style={{ fontSize: 12, color: 'var(--text-3)', fontFamily: 'Geist Mono, monospace' }}>— Lucía F. · Mendoza · Referente Gold</div>
+            </div>
+          </div>
+
+          {/* Right: signup form */}
+          <div style={{ padding: '60px 56px', display: 'flex', flexDirection: 'column', gap: 28 }}>
+            <div>
+              <h3 style={{ fontSize: 28, fontWeight: 700, letterSpacing: '-0.025em', margin: '0 0 8px' }}>Activar mi panel</h3>
+              <p style={{ fontSize: 14, color: 'var(--text-2)', lineHeight: 1.6 }}>Si ya manejás un BYD, en 2 minutos tenés tu link de referente activo. Sin trámites, sin aprobación.</p>
+            </div>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+                <div>
+                  <label style={{ display: 'block', fontSize: 11, fontFamily: 'Geist Mono, monospace', color: 'var(--text-3)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 6 }}>Nombre</label>
+                  <input type="text" placeholder="Martín" style={{ width: '100%', padding: '11px 14px', background: 'rgba(0,0,0,0.35)', border: '1px solid var(--border)', borderRadius: 10, fontFamily: 'Sora, sans-serif', fontSize: 14, color: 'var(--text)', outline: 'none' }}/>
+                </div>
+                <div>
+                  <label style={{ display: 'block', fontSize: 11, fontFamily: 'Geist Mono, monospace', color: 'var(--text-3)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 6 }}>Apellido</label>
+                  <input type="text" placeholder="Cardoso" style={{ width: '100%', padding: '11px 14px', background: 'rgba(0,0,0,0.35)', border: '1px solid var(--border)', borderRadius: 10, fontFamily: 'Sora, sans-serif', fontSize: 14, color: 'var(--text)', outline: 'none' }}/>
+                </div>
+              </div>
+              <div>
+                <label style={{ display: 'block', fontSize: 11, fontFamily: 'Geist Mono, monospace', color: 'var(--text-3)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 6 }}>Email</label>
+                <input type="email" placeholder="martin@email.com" style={{ width: '100%', padding: '11px 14px', background: 'rgba(0,0,0,0.35)', border: '1px solid var(--border)', borderRadius: 10, fontFamily: 'Sora, sans-serif', fontSize: 14, color: 'var(--text)', outline: 'none' }}/>
+              </div>
+              <div>
+                <label style={{ display: 'block', fontSize: 11, fontFamily: 'Geist Mono, monospace', color: 'var(--text-3)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 6 }}>Modelo BYD que manejás</label>
+                <select style={{ width: '100%', padding: '11px 14px', background: 'rgba(0,0,0,0.35)', border: '1px solid var(--border)', borderRadius: 10, fontFamily: 'Sora, sans-serif', fontSize: 14, color: 'var(--text)', outline: 'none', WebkitAppearance: 'none' }}>
+                  <option>BYD Dolphin Mini</option>
+                  <option>BYD Yuan Pro</option>
+                  <option selected>BYD Song Pro DM-i</option>
+                  <option>BYD Shark</option>
+                </select>
+              </div>
+              <div>
+                <label style={{ display: 'block', fontSize: 11, fontFamily: 'Geist Mono, monospace', color: 'var(--text-3)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 6 }}>Ciudad</label>
+                <select style={{ width: '100%', padding: '11px 14px', background: 'rgba(0,0,0,0.35)', border: '1px solid var(--border)', borderRadius: 10, fontFamily: 'Sora, sans-serif', fontSize: 14, color: 'var(--text)', outline: 'none', WebkitAppearance: 'none' }}>
+                  <option>CABA</option>
+                  <option>Gran Buenos Aires</option>
+                  <option>Córdoba</option>
+                  <option>Rosario</option>
+                  <option>Mendoza</option>
+                  <option>Otra ciudad</option>
+                </select>
+              </div>
+            </div>
+
+            <Link href="/auth/signup?rol=referente" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, padding: '15px 24px', background: 'var(--byd-red)', color: '#fff', borderRadius: 12, fontSize: 16, fontWeight: 700, textDecoration: 'none', border: '1px solid var(--byd-red)', letterSpacing: '-0.01em' }}>
+              Activar mi panel de referente →
+            </Link>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+              {[
+                'Sin metas de venta ni presión',
+                'Comisión en dólares por cada venta cerrada',
+                'Panel con métricas en tiempo real',
+                'Puntos canjeables por services BYD',
+              ].map(f => (
+                <div key={f} style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: 13, color: 'var(--text-2)' }}>
+                  <div style={{ width: 18, height: 18, borderRadius: '50%', background: 'rgba(52,211,153,0.15)', border: '1px solid rgba(52,211,153,0.30)', display: 'grid', placeItems: 'center', flexShrink: 0 }}>
+                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#34D399" strokeWidth="3" strokeLinecap="round"><path d="M20 6 9 17l-5-5"/></svg>
+                  </div>
+                  {f}
+                </div>
+              ))}
+            </div>
+
+            <p style={{ fontSize: 12, color: 'var(--text-3)', lineHeight: 1.5 }}>
+              ¿Ya tenés cuenta? <a href="/auth/login" style={{ color: 'var(--text-2)', textDecoration: 'underline' }}>Ingresá a tu panel →</a>
+            </p>
+          </div>
         </div>
       </div>
 
