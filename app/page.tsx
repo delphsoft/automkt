@@ -359,9 +359,6 @@ export default function Home() {
           </svg>
         </div>
       </div>
-        </div>
-  
-      </div>
 
       {/* ── TRUST STRIP ─────────────────────────────────────── */}
       <div style={{
