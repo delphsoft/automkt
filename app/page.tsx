@@ -110,7 +110,7 @@ const S = {
   section:  { padding: '100px 0 20px' } as React.CSSProperties,
   eyebrow:  {
     fontSize: 12, fontFamily: 'var(--ff-mono,Geist Mono,monospace)',
-    color: 'var(--byd-red-2)', letterSpacing: '0.10em', textTransform: 'uppercase' as const,
+    color: 'var(--byd-red-2)', letterSpacing: '0.10em', textTransform: 'uppercase',
     marginBottom: 14, display: 'inline-flex', alignItems: 'center', gap: 8,
   } as React.CSSProperties,
 }
@@ -358,6 +358,7 @@ export default function Home() {
             <path d="M8 22h8"/>
           </svg>
         </div>
+      </div>
       </div>
 
       {/* ── TRUST STRIP ─────────────────────────────────────── */}
@@ -752,7 +753,7 @@ export default function Home() {
               </svg>
             </div>
             <div>
-              <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '3px 10px', background: 'rgba(52,211,153,0.10)', border: '1px solid rgba(52,211,153,0.20)', borderRadius: 999, fontSize: 10, fontFamily: 'Geist Mono, monospace', color: '#34D399', letterSpacing: '0.08em', textTransform: 'uppercase' as const, marginBottom: 12 }}>
+              <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '3px 10px', background: 'rgba(52,211,153,0.10)', border: '1px solid rgba(52,211,153,0.20)', borderRadius: 999, fontSize: 10, fontFamily: 'Geist Mono, monospace', color: '#34D399', letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: 12 }}>
                 RENAPER · SID
               </div>
               <h3 style={{ fontSize: 22, fontWeight: 600, letterSpacing: '-0.02em', marginBottom: 10, lineHeight: 1.2 }}>
@@ -791,7 +792,7 @@ export default function Home() {
               </svg>
             </div>
             <div>
-              <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '3px 10px', background: 'rgba(110,168,255,0.10)', border: '1px solid rgba(110,168,255,0.20)', borderRadius: 999, fontSize: 10, fontFamily: 'Geist Mono, monospace', color: '#6ea8ff', letterSpacing: '0.08em', textTransform: 'uppercase' as const, marginBottom: 12 }}>
+              <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '3px 10px', background: 'rgba(110,168,255,0.10)', border: '1px solid rgba(110,168,255,0.20)', borderRadius: 999, fontSize: 10, fontFamily: 'Geist Mono, monospace', color: '#6ea8ff', letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: 12 }}>
                 +123Seguro · API
               </div>
               <h3 style={{ fontSize: 22, fontWeight: 600, letterSpacing: '-0.02em', marginBottom: 10, lineHeight: 1.2 }}>
@@ -833,7 +834,7 @@ export default function Home() {
               </svg>
             </div>
             <div>
-              <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '3px 10px', background: 'rgba(212,175,55,0.10)', border: '1px solid rgba(212,175,55,0.20)', borderRadius: 999, fontSize: 10, fontFamily: 'Geist Mono, monospace', color: '#D4AF37', letterSpacing: '0.08em', textTransform: 'uppercase' as const, marginBottom: 12 }}>
+              <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '3px 10px', background: 'rgba(212,175,55,0.10)', border: '1px solid rgba(212,175,55,0.20)', borderRadius: 999, fontSize: 10, fontFamily: 'Geist Mono, monospace', color: '#D4AF37', letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: 12 }}>
                 Battery SoH · OBD
               </div>
               <h3 style={{ fontSize: 22, fontWeight: 600, letterSpacing: '-0.02em', marginBottom: 10, lineHeight: 1.2 }}>

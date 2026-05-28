@@ -1,5 +1,5 @@
-@import "tailwindcss";
 @import url('https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&family=Geist+Mono:wght@400;500&display=swap');
+@import "tailwindcss";
 
 /* ── Design Tokens ──────────────────────────────────────── */
 :root {
@@ -33,9 +33,7 @@
   padding: 0;
 }
 
-html {
-  scroll-behavior: smooth;
-}
+html { scroll-behavior: smooth; }
 
 body {
   font-family: 'Sora', system-ui, -apple-system, sans-serif;
@@ -47,7 +45,6 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* Preserve Tailwind utilities for other pages (browse, listing, etc.) */
 a { color: inherit; }
 button { font-family: inherit; cursor: pointer; }
 img { display: block; max-width: 100%; }
