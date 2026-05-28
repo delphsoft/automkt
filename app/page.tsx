@@ -148,22 +148,16 @@ export default function Home() {
   const sales = Math.round(refs * 0.55)
   const total = sales * calcComm
 
-  useEffect(() => {
-    const close = () => setOpenSF(null)
-    document.addEventListener('click', close)
-    return () => document.removeEventListener('click', close)
-  }, [])
-
-  const toggleSF = (id: SFId, e: React.MouseEvent) => {
-    e.stopPropagation()
+  const toggleSF = (id: SFId) => {
     setOpenSF(prev => prev === id ? null : id)
   }
 
-  const pickSF = (id: SFId, val: string, e: React.MouseEvent) => {
-    e.stopPropagation()
+  const pickSF = (id: SFId, val: string) => {
     setSFValues(p => ({ ...p, [id]: val }))
     setOpenSF(null)
   }
+
+  const closeSF = () => setOpenSF(null)
 
   const runAI = async () => {
     setAiLoading(true)
@@ -245,6 +239,14 @@ export default function Home() {
 
 
       {/* ── SEARCH BAR ── outside hero, no stacking context issues ── */}
+      {/* Overlay to close dropdown when clicking outside */}
+      {openSF && (
+        <div
+          onClick={closeSF}
+          style={{ position: 'fixed', inset: 0, zIndex: 19 }}
+        />
+      )}
+
       <div style={{ maxWidth: 1260, margin: '-36px auto 0', padding: '0 40px', position: 'relative', zIndex: 20 }}>
         <div
           style={{
@@ -260,7 +262,7 @@ export default function Home() {
             {SEARCH_FIELDS.map((field, i) => (
               <div
                 key={field.id}
-                onClick={e => toggleSF(field.id, e)}
+                onClick={() => toggleSF(field.id)}
                 style={{
                   flex: 1, minWidth: 0,
                   padding: '16px 18px',
@@ -284,7 +286,7 @@ export default function Home() {
                 {/* Popover — position:absolute from this field div — no stacking context issues */}
                 {openSF === field.id && (
                   <div
-                    onClick={e => e.stopPropagation()}
+                    
                     style={{
                       position: 'absolute',
                       top: 'calc(100% + 10px)',
@@ -306,13 +308,13 @@ export default function Home() {
                             placeholder="BYD-ABC123"
                             value={refCode}
                             onChange={e => { setRefCode(e.target.value.toUpperCase()); setSFValues(p => ({ ...p, referente: e.target.value.toUpperCase() || '¿Te recomendaron?' })) }}
-                            onClick={e => e.stopPropagation()}
+                            
                             style={{ width: '100%', padding: '8px 10px', background: 'rgba(0,0,0,0.5)', border: '1px solid rgba(255,255,255,0.12)', borderRadius: 8, fontFamily: 'Geist Mono, monospace', fontSize: 12, color: '#f2f2f4', textTransform: 'uppercase', letterSpacing: '0.06em', outline: 'none' }}
                           />
                           <p style={{ fontSize: 11, color: 'rgba(255,255,255,0.3)', marginTop: 5, lineHeight: 1.5 }}>Ingresá el código del dueño BYD.</p>
                         </div>
                         {['Sin código por ahora', 'Asignarme un referente cercano'].map(opt => (
-                          <button key={opt} onClick={e => pickSF(field.id, opt, e)} style={{ display: 'flex', alignItems: 'center', width: '100%', textAlign: 'left', padding: '10px 12px', background: 'transparent', border: 'none', color: sfValues[field.id] === opt ? '#ff4d5a' : 'rgba(255,255,255,0.65)', fontSize: 13, fontFamily: 'Sora, sans-serif', borderRadius: 6, cursor: 'pointer' }}>
+                          <button key={opt} onClick={() => pickSF(field.id, opt)} style={{ display: 'flex', alignItems: 'center', width: '100%', textAlign: 'left', padding: '10px 12px', background: 'transparent', border: 'none', color: sfValues[field.id] === opt ? '#ff4d5a' : 'rgba(255,255,255,0.65)', fontSize: 13, fontFamily: 'Sora, sans-serif', borderRadius: 6, cursor: 'pointer' }}>
                             {opt}
                           </button>
                         ))}
@@ -321,7 +323,7 @@ export default function Home() {
                       <>
                         <div style={{ fontSize: 10, fontFamily: 'Geist Mono, monospace', color: 'rgba(255,255,255,0.3)', textTransform: 'uppercase', letterSpacing: '0.10em', padding: '7px 12px 4px' }}>Seleccioná un modelo</div>
                         {SEARCH_OPTIONS.modelo.map((opt, idx) => (
-                          <button key={opt} onClick={e => pickSF(field.id, opt, e)} style={{ display: 'flex', alignItems: 'center', gap: 10, width: '100%', textAlign: 'left', padding: '9px 10px', background: 'transparent', border: 'none', color: sfValues[field.id] === opt ? '#ff4d5a' : 'rgba(255,255,255,0.65)', fontSize: 13, fontFamily: 'Sora, sans-serif', borderRadius: 6, cursor: 'pointer' }}>
+                          <button key={opt} onClick={() => pickSF(field.id, opt)} style={{ display: 'flex', alignItems: 'center', gap: 10, width: '100%', textAlign: 'left', padding: '9px 10px', background: 'transparent', border: 'none', color: sfValues[field.id] === opt ? '#ff4d5a' : 'rgba(255,255,255,0.65)', fontSize: 13, fontFamily: 'Sora, sans-serif', borderRadius: 6, cursor: 'pointer' }}>
                             <div style={{ width: 48, height: 32, borderRadius: 6, overflow: 'hidden', flexShrink: 0, background: idx === 0 ? '#E60012' : 'rgba(255,255,255,0.08)', display: 'grid', placeItems: 'center' }}>
                               {idx === 0
                                 ? <span style={{ fontWeight: 800, fontSize: 9, color: '#fff', fontFamily: 'Sora, sans-serif' }}>BYD</span>
@@ -338,7 +340,7 @@ export default function Home() {
                           {field.label}
                         </div>
                         {SEARCH_OPTIONS[field.id].map(opt => (
-                          <button key={opt} onClick={e => pickSF(field.id, opt, e)} style={{ display: 'flex', alignItems: 'center', width: '100%', textAlign: 'left', padding: '10px 12px', background: 'transparent', border: 'none', color: sfValues[field.id] === opt ? '#ff4d5a' : 'rgba(255,255,255,0.65)', fontSize: 13, fontFamily: 'Sora, sans-serif', borderRadius: 6, cursor: 'pointer' }}>
+                          <button key={opt} onClick={() => pickSF(field.id, opt)} style={{ display: 'flex', alignItems: 'center', width: '100%', textAlign: 'left', padding: '10px 12px', background: 'transparent', border: 'none', color: sfValues[field.id] === opt ? '#ff4d5a' : 'rgba(255,255,255,0.65)', fontSize: 13, fontFamily: 'Sora, sans-serif', borderRadius: 6, cursor: 'pointer' }}>
                             {opt}
                           </button>
                         ))}
