@@ -269,7 +269,6 @@ export default function Home() {
                 borderRight: i < SEARCH_FIELDS.length - 1 ? '1px solid rgba(255,255,255,0.08)' : 'none',
                 cursor: 'pointer',
                 background: openSF === field.id ? 'rgba(255,255,255,0.06)' : 'transparent',
-                position: 'relative',
                 transition: 'background 0.15s',
               }}
             >
