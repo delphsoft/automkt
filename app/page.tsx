@@ -1,5 +1,6 @@
 'use client'
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useEffect, useCallback } from 'react'
+import { createPortal } from 'react-dom'
 import Link from 'next/link'
 
 // ─── Embedded images (base64) ────────────────────────────────────────────────
@@ -118,6 +119,7 @@ const S = {
 // ─── Component ───────────────────────────────────────────────────────────────
 export default function Home() {
   const [openSF, setOpenSF] = useState<SFId | null>(null)
+  const [popoverPos, setPopoverPos] = useState<{top: number, left: number} | null>(null)
   const [sfValues, setSFValues] = useState<Record<SFId, string>>({
     modelo: 'Todos los BYD',
     tipo: 'EV · PHEV',
@@ -149,20 +151,28 @@ export default function Home() {
   const total = sales * calcComm
 
   useEffect(() => {
-    const close = () => setOpenSF(null)
+    const close = () => { setOpenSF(null); setPopoverPos(null) }
     document.addEventListener('click', close)
     return () => document.removeEventListener('click', close)
   }, [])
 
   const toggleSF = (id: SFId, e: React.MouseEvent) => {
     e.stopPropagation()
-    setOpenSF(openSF === id ? null : id)
+    if (openSF === id) {
+      setOpenSF(null)
+      setPopoverPos(null)
+    } else {
+      const rect = (e.currentTarget as HTMLElement).getBoundingClientRect()
+      setPopoverPos({ top: rect.bottom + 12, left: rect.left })
+      setOpenSF(id)
+    }
   }
 
   const pickSF = (id: SFId, val: string, e: React.MouseEvent) => {
     e.stopPropagation()
     setSFValues(p => ({ ...p, [id]: val }))
     setOpenSF(null)
+    setPopoverPos(null)
   }
 
   const runAI = async () => {
@@ -203,12 +213,13 @@ export default function Home() {
     <div style={{ background: 'radial-gradient(1200px 600px at 80% -10%,rgba(230,0,18,.10),transparent 60%),radial-gradient(900px 500px at -10% 30%,rgba(255,180,120,.04),transparent 60%),var(--bg)', minHeight: '100vh' }}>
 
       {/* ── HERO ─────────────────────────────────────────────── */}
-      <div style={{ padding: '28px 40px 0', maxWidth: 1260, margin: '0 auto', position: 'relative' }}>
+      <div style={{ padding: '28px 40px 0', maxWidth: 1260, margin: '0 auto', position: 'relative', zIndex: 10 }}>
         <div style={{
-          position: 'relative', borderRadius: 28, overflow: 'clip',
+          position: 'relative', borderRadius: 28,
           aspectRatio: '16/8', minHeight: 640,
           border: '1px solid rgba(255,255,255,0.08)',
           boxShadow: '0 60px 120px -40px rgba(0,0,0,0.7), inset 0 1px 0 rgba(255,255,255,0.06)',
+          overflow: 'hidden',
         }}>
           {/* Background image */}
           <img src={IMG_HERO} alt="" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', zIndex: 1 }} />
@@ -216,9 +227,6 @@ export default function Home() {
           <div style={{ position: 'absolute', inset: 0, zIndex: 2, background: 'linear-gradient(180deg,rgba(8,8,10,.2) 0%,rgba(8,8,10,.08) 35%,rgba(8,8,10,.72) 82%,rgba(8,8,10,.9) 100%)' }} />
           {/* Grid */}
           <div style={{ position: 'absolute', inset: 0, zIndex: 2, backgroundImage: 'linear-gradient(to right,rgba(255,255,255,.05) 1px,transparent 1px),linear-gradient(to bottom,rgba(255,255,255,.05) 1px,transparent 1px)', backgroundSize: '25% 33.33%', mixBlendMode: 'overlay', opacity: 0.6, pointerEvents: 'none' }} />
-
-
-
 
 
           {/* Content */}
@@ -265,7 +273,6 @@ export default function Home() {
                 flex: 1, minWidth: 0,
                 padding: '16px 18px',
                 display: 'flex', flexDirection: 'column', gap: 3,
-                position: 'relative',
                 borderRight: i < SEARCH_FIELDS.length - 1 ? '1px solid rgba(255,255,255,0.08)' : 'none',
                 cursor: 'pointer',
                 background: openSF === field.id ? 'rgba(255,255,255,0.06)' : 'transparent',
@@ -278,73 +285,77 @@ export default function Home() {
               <span style={{ fontSize: 13, color: 'var(--text)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', fontWeight: 500 }}>
                 {field.id === 'referente' ? (refCode || sfValues.referente) : sfValues[field.id]}
               </span>
-              {/* Arrow */}
-              <svg style={{ position: 'absolute', right: 12, top: '50%', transform: `translateY(-50%) rotate(${openSF === field.id ? 180 : 0}deg)`, color: openSF === field.id ? 'var(--byd-red-2)' : 'rgba(255,255,255,0.22)', transition: 'transform 0.2s', pointerEvents: 'none' }} width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="m6 9 6 6 6-6"/></svg>
-
-              {/* Popover */}
-              {openSF === field.id && (
-                <div
-                  onClick={e => e.stopPropagation()}
-                  style={{
-                    position: 'absolute', top: 'calc(100% + 12px)', left: -1,
-                    minWidth: 220, maxWidth: 320,
-                    background: 'rgba(14,14,18,0.98)', backdropFilter: 'blur(28px) saturate(180%)',
-                    border: '1px solid rgba(255,255,255,0.16)', borderRadius: 14,
-                    padding: 6, zIndex: 500,
-                    boxShadow: '0 28px 64px -20px rgba(0,0,0,0.85)',
-                  }}
-                >
-                  {field.id === 'referente' ? (
-                    <>
-                      <div style={{ padding: '5px 5px 8px', borderBottom: '1px solid rgba(255,255,255,0.08)', marginBottom: 4 }}>
-                        <input
-                          type="text"
-                          placeholder="BYD-ABC123"
-                          value={refCode}
-                          onChange={e => { setRefCode(e.target.value.toUpperCase()); setSFValues(p => ({ ...p, referente: e.target.value.toUpperCase() || '¿Te recomendaron?' })) }}
-                          onClick={e => e.stopPropagation()}
-                          style={{ width: '100%', padding: '8px 10px', background: 'rgba(0,0,0,0.4)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 8, fontFamily: 'Geist Mono, monospace', fontSize: 12, color: 'var(--text)', textTransform: 'uppercase', letterSpacing: '0.06em', outline: 'none' }}
-                        />
-                        <p style={{ fontSize: 11, color: 'rgba(255,255,255,0.3)', marginTop: 5, lineHeight: 1.5 }}>Ingresá el código del dueño BYD.</p>
-                      </div>
-                      {['Sin código por ahora', 'Asignarme un referente cercano'].map(opt => (
-                        <button key={opt} onClick={e => pickSF(field.id, opt, e)} style={{ display: 'flex', alignItems: 'center', width: '100%', textAlign: 'left', padding: '9px 11px', background: 'transparent', border: 'none', color: sfValues[field.id] === opt ? 'var(--byd-red-2)' : 'rgba(255,255,255,0.5)', fontSize: 13, fontFamily: 'Sora, sans-serif', borderRadius: 6, cursor: 'pointer' }}>
-                          {opt}
-                        </button>
-                      ))}
-                    </>
-                  ) : (
-                    <>
-                      <div style={{ fontSize: 10, fontFamily: 'Geist Mono, monospace', color: 'rgba(255,255,255,0.28)', textTransform: 'uppercase', letterSpacing: '0.10em', padding: '7px 11px 3px' }}>
-                        {field.label}
-                      </div>
-                      {/* Model field: show thumbnails */}
-                      {field.id === 'modelo' ? (
-                        SEARCH_OPTIONS.modelo.map((opt, idx) => (
-                          <button key={opt} onClick={e => pickSF(field.id, opt, e)} style={{ display: 'flex', alignItems: 'center', gap: 9, width: '100%', textAlign: 'left', padding: '8px 10px', background: 'transparent', border: 'none', color: sfValues[field.id] === opt ? 'var(--byd-red-2)' : 'rgba(255,255,255,0.5)', fontSize: 13, fontFamily: 'Sora, sans-serif', borderRadius: 6, cursor: 'pointer' }}>
-                            <div style={{ width: 44, height: 30, borderRadius: 5, overflow: 'hidden', flexShrink: 0, background: idx === 0 ? 'var(--byd-red)' : 'rgba(255,255,255,0.06)', display: 'grid', placeItems: 'center' }}>
-                              {idx === 0
-                                ? <span style={{ fontWeight: 800, fontSize: 9, color: '#fff' }}>BYD</span>
-                                : <img src={[IMG_DOLPHIN,IMG_YUAN,IMG_SONG,IMG_SHARK][idx-1]} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                              }
-                            </div>
-                            {opt}
-                          </button>
-                        ))
-                      ) : (
-                        SEARCH_OPTIONS[field.id].map(opt => (
-                          <button key={opt} onClick={e => pickSF(field.id, opt, e)} style={{ display: 'flex', alignItems: 'center', width: '100%', textAlign: 'left', padding: '9px 11px', background: 'transparent', border: 'none', color: sfValues[field.id] === opt ? 'var(--byd-red-2)' : 'rgba(255,255,255,0.5)', fontSize: 13, fontFamily: 'Sora, sans-serif', borderRadius: 6, cursor: 'pointer' }}>
-                            {opt}
-                          </button>
-                        ))
-                      )}
-                    </>
-                  )}
-                </div>
-              )}
+              <svg style={{ position: 'absolute', right: 12, top: '50%', transform: `translateY(-50%) rotate(${openSF === field.id ? 180 : 0}deg)`, color: openSF === field.id ? 'var(--byd-red-2)' : 'rgba(255,255,255,0.22)', transition: 'transform 0.2s', pointerEvents: 'none', flexShrink: 0 }} width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="m6 9 6 6 6-6"/></svg>
             </div>
           ))}
         </div>
+
+        {/* Portal popover — rendered at body level, always on top */}
+        {openSF && popoverPos && typeof window !== 'undefined' && createPortal(
+          <div
+            onClick={e => e.stopPropagation()}
+            style={{
+              position: 'fixed',
+              top: popoverPos.top,
+              left: popoverPos.left,
+              minWidth: 260, maxWidth: 360,
+              background: '#0e0e12',
+              border: '1px solid rgba(255,255,255,0.20)',
+              borderRadius: 14,
+              padding: 6,
+              zIndex: 99999,
+              boxShadow: '0 28px 64px -10px rgba(0,0,0,0.9)',
+            }}
+          >
+            {openSF === 'referente' ? (
+              <>
+                <div style={{ padding: '5px 5px 8px', borderBottom: '1px solid rgba(255,255,255,0.08)', marginBottom: 4 }}>
+                  <input
+                    type="text"
+                    placeholder="BYD-ABC123"
+                    value={refCode}
+                    onChange={e => { setRefCode(e.target.value.toUpperCase()); setSFValues(p => ({ ...p, referente: e.target.value.toUpperCase() || '¿Te recomendaron?' })) }}
+                    onClick={e => e.stopPropagation()}
+                    style={{ width: '100%', padding: '8px 10px', background: 'rgba(0,0,0,0.5)', border: '1px solid rgba(255,255,255,0.12)', borderRadius: 8, fontFamily: 'Geist Mono, monospace', fontSize: 12, color: '#f2f2f4', textTransform: 'uppercase', letterSpacing: '0.06em', outline: 'none' }}
+                  />
+                  <p style={{ fontSize: 11, color: 'rgba(255,255,255,0.3)', marginTop: 5, lineHeight: 1.5 }}>Ingresá el código del dueño BYD.</p>
+                </div>
+                {['Sin código por ahora', 'Asignarme un referente cercano'].map(opt => (
+                  <button key={opt} onClick={e => pickSF('referente', opt, e)} style={{ display: 'flex', alignItems: 'center', width: '100%', textAlign: 'left', padding: '10px 12px', background: 'transparent', border: 'none', color: sfValues.referente === opt ? '#ff4d5a' : 'rgba(255,255,255,0.55)', fontSize: 13, fontFamily: 'Sora, sans-serif', borderRadius: 6, cursor: 'pointer' }}>
+                    {opt}
+                  </button>
+                ))}
+              </>
+            ) : openSF === 'modelo' ? (
+              <>
+                <div style={{ fontSize: 10, fontFamily: 'Geist Mono, monospace', color: 'rgba(255,255,255,0.3)', textTransform: 'uppercase', letterSpacing: '0.10em', padding: '7px 12px 4px' }}>Seleccioná un modelo</div>
+                {SEARCH_OPTIONS.modelo.map((opt, idx) => (
+                  <button key={opt} onClick={e => pickSF('modelo', opt, e)} style={{ display: 'flex', alignItems: 'center', gap: 10, width: '100%', textAlign: 'left', padding: '9px 10px', background: 'transparent', border: 'none', color: sfValues.modelo === opt ? '#ff4d5a' : 'rgba(255,255,255,0.65)', fontSize: 13, fontFamily: 'Sora, sans-serif', borderRadius: 6, cursor: 'pointer' }}>
+                    <div style={{ width: 48, height: 32, borderRadius: 6, overflow: 'hidden', flexShrink: 0, background: idx === 0 ? '#E60012' : 'rgba(255,255,255,0.08)', display: 'grid', placeItems: 'center' }}>
+                      {idx === 0
+                        ? <span style={{ fontWeight: 800, fontSize: 9, color: '#fff', fontFamily: 'Sora, sans-serif' }}>BYD</span>
+                        : <img src={[IMG_DOLPHIN,IMG_YUAN,IMG_SONG,IMG_SHARK][idx-1]} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                      }
+                    </div>
+                    {opt}
+                  </button>
+                ))}
+              </>
+            ) : (
+              <>
+                <div style={{ fontSize: 10, fontFamily: 'Geist Mono, monospace', color: 'rgba(255,255,255,0.3)', textTransform: 'uppercase', letterSpacing: '0.10em', padding: '7px 12px 4px' }}>
+                  {SEARCH_FIELDS.find(f => f.id === openSF)?.label}
+                </div>
+                {SEARCH_OPTIONS[openSF]?.map(opt => (
+                  <button key={opt} onClick={e => pickSF(openSF, opt, e)} style={{ display: 'flex', alignItems: 'center', width: '100%', textAlign: 'left', padding: '10px 12px', background: 'transparent', border: 'none', color: sfValues[openSF] === opt ? '#ff4d5a' : 'rgba(255,255,255,0.65)', fontSize: 13, fontFamily: 'Sora, sans-serif', borderRadius: 6, cursor: 'pointer' }}>
+                    {opt}
+                  </button>
+                ))}
+              </>
+            )}
+          </div>,
+          document.body
+        )}
 
         {/* Mic button */}
         <div style={{ width: 60, display: 'grid', placeItems: 'center', background: 'var(--byd-red)', color: '#fff', cursor: 'pointer', borderRadius: '0 999px 999px 0', flexShrink: 0 }}>
@@ -1070,6 +1081,7 @@ export default function Home() {
 
       <style>{`
         @keyframes blink { 0%,80%,100% { opacity: 0.15; } 40% { opacity: 1; } }
+        @keyframes sfPopIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
       `}</style>
     </div>
   )
